@@ -1,4 +1,5 @@
 const db = require("../db");
+const validator = require("../validators/meetupValidator");
 
 class MeetupController {
   async getMeetups(req, res) {
@@ -14,7 +15,13 @@ class MeetupController {
   }
 
   async getMeetupsById(req, res) {
-    const id = parseInt(req.params.id);
+    const { error, value } = validator.validateMeetupId(req.params);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { id } = value;
 
     await db.query(
       "SELECT * FROM meetup WHERE meetup_id = $1",
@@ -32,7 +39,13 @@ class MeetupController {
   }
 
   async createMeetup(req, res) {
-    const { name, description, keywords, time, place } = req.body;
+    const { error, value } = validator.validateCreateMeetup(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { name, description, keywords, time, place } = value;
 
     try {
       const newMeetup = await db.query(
@@ -47,7 +60,13 @@ class MeetupController {
   }
 
   async updateMeetup(req, res) {
-    const { id, name, description, keywords, time, place } = req.body;
+    const { error, value } = validator.validateUpdateMeetup(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { id, name, description, keywords, time, place } = value;
 
     await db.query(
       "UPDATE meetup set name = $1, description = $2, keywords = $3, time = $4, place = $5 where meetup_id = $6 RETURNING *",
@@ -67,14 +86,18 @@ class MeetupController {
   }
 
   async deleteMeetup(req, res) {
-    const id = parseInt(req.params.id);
+    const { error, value } = validator.validateMeetupId(req.params);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { id } = value;
 
     await db.query(
       "DELETE FROM meetup where meetup_id = $1",
       [id],
       (error, results) => {
-        console.log(error || "No error");
-        console.log(results);
         if (error) {
           return res.status(500).json();
         }
