@@ -3,15 +3,39 @@ const validator = require("../validators/meetupValidator");
 
 class MeetupController {
   async getMeetups(req, res) {
-    await db.query("SELECT * FROM meetup", (error, results) => {
-      if (error) {
-        return res.status(500).json();
+    const fieldNames = ["name", "description", "keywords", "time", "place"];
+    const filters = req.query;
+
+    let filterSubquery = ``;
+    for (let filter in filters) {
+      if (fieldNames.includes(filter)) {
+        if (filterSubquery.length) filterSubquery += " AND ";
+        if (filter === "time") {
+          filterSubquery += ` ${filter}::date = '${filters[filter]}'::date `;
+        } else if (filter === "keywords") {
+          filterSubquery += ` EXISTS (
+            SELECT *
+            FROM unnest(keywords) AS element
+            WHERE element ILIKE '%${filters[filter]}%') `;
+        } else {
+          filterSubquery += ` ${filter} ILIKE '%${filters[filter]}%' `;
+        }
       }
-      if (!results.rows.length) {
-        return res.status(204).json();
+    }
+    const helperSubquery = ` WHERE ${filterSubquery}`;
+
+    await db.query(
+      `SELECT * FROM meetup ${helperSubquery.length > 7 ? helperSubquery : ""}`,
+      (error, results) => {
+        if (error) {
+          return res.status(500).json();
+        }
+        if (!results.rows.length) {
+          return res.status(204).json();
+        }
+        return res.status(200).json(results.rows);
       }
-      return res.status(200).json(results.rows);
-    });
+    );
   }
 
   async getMeetupsById(req, res) {
