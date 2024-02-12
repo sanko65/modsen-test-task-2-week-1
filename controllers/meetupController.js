@@ -15,6 +15,9 @@ class MeetupController {
       ? req.query.order
       : [req.query.order].filter(Boolean);
 
+    const limit = Number.isInteger(+req.query.limit) ? req.query.limit : 0;
+    const offset = Number.isInteger(+req.query.offset) ? req.query.offset : 0;
+
     let filterSubquery = ``;
     for (let filter in filters) {
       if (fieldNames.includes(filter)) {
@@ -38,7 +41,7 @@ class MeetupController {
     let sortSubquery = ``;
     if (sortFields) {
       for (let i = 0; i < sortFields.length; i++) {
-        if (filterNames.includes(sortFields[i])) {
+        if (fieldNames.includes(sortFields[i])) {
           const order = sortOrders[i] || `ASC`;
           sortSubquery += `${sortFields[i]} ${order}`;
           if (i !== sortFields.length - 1) {
@@ -47,14 +50,18 @@ class MeetupController {
         }
       }
     } else {
-      sortQuery = " ORDER BY meetup_id ASC";
+      sortSubquery = " ORDER BY meetup_id ASC";
     }
     if (sortSubquery) {
       sortSubquery = ` ORDER BY ${sortSubquery}`;
     }
 
+    let pageSubquery = ``;
+    if (limit) pageSubquery += `LIMIT ${limit} `;
+    if (offset) pageSubquery += `OFFSET ${offset}`;
+
     await db.query(
-      `SELECT * FROM meetup ${filterSubquery} ${sortSubquery}`,
+      `SELECT * FROM meetup ${filterSubquery} ${sortSubquery} ${pageSubquery}`,
       (error, results) => {
         if (error) {
           return res.status(500).json();
