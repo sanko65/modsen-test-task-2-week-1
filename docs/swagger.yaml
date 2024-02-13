@@ -1,0 +1,229 @@
+components:
+  schemas:
+    Meetup:
+      type: object
+      required: -meetup_id
+        -name
+        -description
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        name:
+          type: string
+          minLength: 5
+          maxLength: 80
+        description:
+          type: string
+          minLength: 5
+          maxLength: 300
+        keywords:
+          type: array
+          items:
+            type: string
+            minLength: 2
+            maxLength: 30
+        time:
+          type: string
+          format: date-time
+        place:
+          type: string
+          minLength: 5
+          maxLength: 50
+      example:
+        meetup_id: 242342323
+        name: Mobile App Development Workshop
+        description: Learn about mobile app development strategies and tools from industry experts.
+        keywords: ["Mobile app development", "iOS", "Android"]
+        time: 2024-02-25T14:30:00.000Z
+        place: AppSpace, 456 Oak St
+
+tags:
+  name: Meetups
+  description: Meetups managing API
+
+/meetups:
+  get:
+    summary: Get meetups
+    tags: [Meetups]
+    description: Retrieve a list of meetups based on provided filters and sorting parameters
+    parameters:
+      - in: query
+        name: name
+        schema:
+          type: string
+          minLength: 5
+          maxLength: 80
+        description: Filter by meetup name
+      - in: query
+        name: description
+        schema:
+          type: string
+          minLength: 5
+          maxLength: 300
+        description: Filter by meetup description
+      - in: query
+        name: keywords
+        schema:
+          type: array
+          items:
+            type: string
+            minLength: 5
+            maxLength: 30
+        description: Filter by meetup keywords
+      - in: query
+        name: time
+        schema:
+          type: string
+          format: date-time
+        description: Filter by meetup time
+      - in: query
+        name: place
+        schema:
+          type: string
+          minLength: 5
+          maxLength: 50
+        description: Filter by meetup place
+      - in: query
+        name: sort_by
+        schema:
+          type: string
+        description:
+          Field to sort by. Can be `name`, `description`, `keywords`, `time`, `place`.
+          Multiple values can be passed to sort by multiple fields.
+      - in: query
+        name: order
+        schema:
+          type: string
+          enum: [ASC, DESC]
+        description:
+          Sort order. Can be `ASC` for ascending or `DESC` for descending.
+          Corresponding to the fields passed in `sort_by`.
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          minimum: 1
+        description: Maximum number of meetups to return
+      - in: query
+        name: offset
+        schema:
+          type: integer
+          minimum: 0
+        description: Number of meetups to skip before returning results
+    responses:
+      "200":
+        description: A list of meetups
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Meetup"
+      "204":
+        description: No content
+      "500":
+        description: Internal server error
+  post:
+    summary: Create a new meetup
+    tags: [Meetups]
+    description: Create a new meetup with provided details
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Meetup"
+    responses:
+      "201":
+        description: Created meetup object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Meetup"
+      "400":
+        description: Invalid parameters
+      "500":
+        description: Internal server error
+  put:
+    summary: Update a meetup
+    tags: [Meetups]
+    description: Update a meetup with provided details
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Meetup"
+    responses:
+      "200":
+        description: Meetup successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Meetup with id {243424} successfully updated
+      "404":
+        description: No meetup with this id
+      "500":
+        description: Internal server error
+
+/meetups/{id}:
+  get:
+    summary: Get meetup by id
+    tags: [Meetups]
+    description: Retrieve a meetup by id
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+        required: true
+        description: ID of meetup
+    responses:
+      "200":
+        description: Meetup by id
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Meetup"
+      "204":
+        description: No content
+      "400":
+        description: Invalid id
+      "500":
+        description: Internal server error
+  delete:
+    summary: Delete a meetup
+    tags: [Meetups]
+    description: Delete an existing meetup by ID
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+        required: true
+        description: ID of the meetup to delete
+    responses:
+      "200":
+        description: Meetup successfully deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Meetup with id {12323123} successfully deleted
+      "404":
+        description: No meetup with the specified id
+      "500":
+        description: Internal server error
