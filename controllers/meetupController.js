@@ -100,6 +100,7 @@ class MeetupController {
 
   async createMeetup(req, res) {
     const { error, value } = validator.validateCreateMeetup(req.body);
+    const { user_id } = req.user;
 
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -109,8 +110,8 @@ class MeetupController {
 
     try {
       const newMeetup = await db.query(
-        "INSERT INTO meetup (name, description, keywords, time, place) values ($1, $2, $3, $4, $5) RETURNING *",
-        [name, description, keywords, time, place]
+        "INSERT INTO meetup (name, description, keywords, time, place, creator_id) values ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [name, description, keywords, time, place, user_id]
       );
 
       return res.status(201).json(newMeetup.rows[0]);
@@ -127,6 +128,18 @@ class MeetupController {
     }
 
     const { id, name, description, keywords, time, place } = value;
+
+    const meetup = await db.query("SELECT * FROM meetup WHERE meetup_id = $1", [
+      id,
+    ]);
+
+    if (meetup.rows.length === 0) {
+      return res.status(404).json(`No meetup with id ${id}`);
+    }
+
+    if (req.user.user_id !== meetup.rows[0].creator_id) {
+      return res.status(403).json("You are not the creator of this meetup");
+    }
 
     await db.query(
       "UPDATE meetup set name = $1, description = $2, keywords = $3, time = $4, place = $5 where meetup_id = $6 RETURNING *",
@@ -154,6 +167,18 @@ class MeetupController {
 
     const { id } = value;
 
+    const meetup = await db.query("SELECT * FROM meetup WHERE meetup_id = $1", [
+      id,
+    ]);
+
+    if (meetup.rows.length === 0) {
+      return res.status(404).json(`No meetup with id ${id}`);
+    }
+
+    if (req.user.user_id !== meetup.rows[0].creator_id) {
+      return res.status(403).json("You are not the creator of this meetup");
+    }
+
     await db.query(
       "DELETE FROM meetup where meetup_id = $1",
       [id],
@@ -178,7 +203,6 @@ class MeetupController {
       "INSERT INTO attendees (user_id, meetup_id) VALUES($1, $2)",
       [user_id, meetup_id],
       (error, results) => {
-        console.log(error, results);
         if (error) {
           return res.status(500).json();
         }

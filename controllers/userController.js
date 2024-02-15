@@ -81,18 +81,27 @@ class UserController {
   async takeUserInfo(req, res) {
     const { user_id, email, role } = req.user;
 
-    await db.query(
-      "SELECT m.* FROM meetup m JOIN attendees a ON m.meetup_id = a.meetup_id WHERE a.user_id = $1",
-      [user_id],
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        return res
-          .status(200)
-          .json({ user_id, email, role, attendees: results.rows });
-      }
-    );
+    try {
+      const attendees = await db.query(
+        "SELECT m.* FROM meetup m JOIN attendees a ON m.meetup_id = a.meetup_id WHERE a.user_id = $1",
+        [user_id]
+      );
+
+      const createdMeetups = await db.query(
+        "SELECT * FROM meetup WHERE creator_id = $1",
+        [user_id]
+      );
+
+      return res.status(200).json({
+        user_id,
+        email,
+        role,
+        attendees: attendees.rows,
+        createdMeetups: createdMeetups.rows,
+      });
+    } catch (error) {
+      return res.status(500).json();
+    }
   }
 
   async refreshToken(req, res) {
