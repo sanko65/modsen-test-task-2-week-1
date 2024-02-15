@@ -11,5 +11,6 @@ router.get(
 );
 router.post("/signup", userController.signup);
 router.get("/signin", userController.signin);
+router.get("/refreshtoken", userController.refreshToken);
 
 module.exports = router;

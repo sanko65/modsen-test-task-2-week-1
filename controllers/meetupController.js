@@ -170,6 +170,27 @@ class MeetupController {
       }
     );
   }
+
+  async attendMeetup(req, res) {
+    const meetup_id = req.params.id;
+    const { user_id } = req.user;
+    await db.query(
+      "INSERT INTO attendees (user_id, meetup_id) VALUES($1, $2)",
+      [user_id, meetup_id],
+      (error, results) => {
+        console.log(error, results);
+        if (error) {
+          return res.status(500).json();
+        }
+        if (!results.rowCount) {
+          return res.status(404).json(`No meetup with id ${meetup_id}`);
+        }
+        return res
+          .status(200)
+          .json(`You attend to meetup with id ${meetup_id}`);
+      }
+    );
+  }
 }
 
 module.exports = new MeetupController();

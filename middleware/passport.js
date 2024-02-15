@@ -4,7 +4,7 @@ const db = require("../db");
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET_KEY,
+  secretOrKey: process.env.JWT_ACCESS_KEY,
 };
 
 module.exports = (passport) => {
@@ -12,7 +12,7 @@ module.exports = (passport) => {
     new JwtStrategy(options, (payload, done) => {
       try {
         db.query(
-          `SELECT "user_id", "email" FROM "user"  WHERE user_id = $1`,
+          `SELECT "user_id", "email", "role" FROM "user"  WHERE user_id = $1`,
           [payload.id],
           (error, results) => {
             if (error) {

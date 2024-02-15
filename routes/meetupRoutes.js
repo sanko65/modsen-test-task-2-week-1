@@ -13,8 +13,25 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   meetupController.getMeetupsById
 );
-router.post("/meetups", meetupController.createMeetup);
-router.put("/meetups", meetupController.updateMeetup);
-router.delete("/meetups/:id", meetupController.deleteMeetup);
+router.post(
+  "/meetups",
+  passport.authenticate("jwt", { session: false }),
+  meetupController.createMeetup
+);
+router.put(
+  "/meetups",
+  passport.authenticate("jwt", { session: false }),
+  meetupController.updateMeetup
+);
+router.delete(
+  "/meetups/:id",
+  passport.authenticate("jwt", { session: false }),
+  meetupController.deleteMeetup
+);
+router.post(
+  "/meetups/:id/attend",
+  passport.authenticate("jwt", { session: false }),
+  meetupController.attendMeetup
+);
 
 module.exports = router;
