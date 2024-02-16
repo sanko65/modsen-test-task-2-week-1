@@ -1,10 +1,18 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
+const validator = require("../validators/userValidator");
 
 class UserController {
   async signup(req, res) {
-    const { email, role, password } = req.body;
+    const { error, value } = validator.validateSignup(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { email, role, password } = value;
+
     const salt = bcrypt.genSaltSync(15);
     const hash_password = bcrypt.hashSync(password, salt);
 
@@ -20,7 +28,13 @@ class UserController {
   }
 
   async signin(req, res) {
-    const { email, password } = req.body;
+    const { error, value } = validator.validateSignin(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { email, password } = value;
 
     await db.query(
       `SELECT * FROM "user" WHERE email = $1`,
@@ -79,13 +93,27 @@ class UserController {
   }
 
   async takeUserInfo(req, res) {
-    const { user_id, email, role } = req.user;
+    const { error, value } = validator.validateTakeUserInfo(req.user);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { user_id, email, role } = value;
 
     try {
       const attendees = await db.query(
         "SELECT m.* FROM meetup m JOIN attendees a ON m.meetup_id = a.meetup_id WHERE a.user_id = $1",
         [user_id]
       );
+
+      if (role === "user")
+        return res.status(200).json({
+          user_id,
+          email,
+          role,
+          attendees: attendees.rows,
+        });
 
       const createdMeetups = await db.query(
         "SELECT * FROM meetup WHERE creator_id = $1",
@@ -105,7 +133,14 @@ class UserController {
   }
 
   async refreshToken(req, res) {
-    const { refreshToken } = req.body;
+    const { error, value } = validator.validateRefreshToken(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { refreshToken } = value;
+
     try {
       const { id, email } = jwt.verify(
         refreshToken,

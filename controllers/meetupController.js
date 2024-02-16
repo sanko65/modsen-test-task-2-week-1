@@ -38,8 +38,8 @@ class MeetupController {
       filterSubquery = ` WHERE ${filterSubquery}`;
     }
 
-    let sortSubquery = ``;
-    if (sortFields) {
+    let sortSubquery = ` ORDER BY `;
+    if (sortFields.length) {
       for (let i = 0; i < sortFields.length; i++) {
         if (fieldNames.includes(sortFields[i])) {
           const order = sortOrders[i] || `ASC`;
@@ -50,18 +50,15 @@ class MeetupController {
         }
       }
     } else {
-      sortSubquery = " ORDER BY meetup_id ASC";
-    }
-    if (sortSubquery) {
-      sortSubquery = ` ORDER BY ${sortSubquery}`;
+      sortSubquery += ` meetup_id ASC `;
     }
 
     let pageSubquery = ``;
-    if (limit) pageSubquery += `LIMIT ${limit} `;
-    if (offset) pageSubquery += `OFFSET ${offset}`;
+    if (limit) pageSubquery += ` LIMIT ${limit}`;
+    if (offset) pageSubquery += ` OFFSET ${offset}`;
 
     await db.query(
-      `SELECT * FROM meetup ${filterSubquery} ${sortSubquery} ${pageSubquery}`,
+      `SELECT * FROM meetup ${filterSubquery} ${sortSubquery}${pageSubquery}`,
       (error, results) => {
         if (error) {
           return res.status(500).json();
@@ -100,13 +97,13 @@ class MeetupController {
 
   async createMeetup(req, res) {
     const { error, value } = validator.validateCreateMeetup(req.body);
-    const { user_id } = req.user;
 
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
 
     const { name, description, keywords, time, place } = value;
+    const { user_id } = req.user;
 
     try {
       const newMeetup = await db.query(
@@ -197,8 +194,15 @@ class MeetupController {
   }
 
   async attendMeetup(req, res) {
-    const meetup_id = req.params.id;
+    const { error, value } = validator.validateMeetupId(req.params);
+
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
+    const { id: meetup_id } = value;
     const { user_id } = req.user;
+
     await db.query(
       "INSERT INTO attendees (user_id, meetup_id) VALUES($1, $2)",
       [user_id, meetup_id],

@@ -16,7 +16,7 @@ const validateCreateMeetup = (meetupInfo) => {
       .items(Joi.string().min(2).max(30).required())
       .optional(),
     time: Joi.date().greater("now").required(),
-    place: Joi.string().min(5).max(50),
+    place: Joi.string().min(5).max(50).required(),
   });
 
   return createMeetupSchema.validate(meetupInfo);
@@ -31,7 +31,7 @@ const validateUpdateMeetup = (meetupInfo) => {
       .items(Joi.string().min(2).max(30).required())
       .optional(),
     time: Joi.date().greater("now").required(),
-    place: Joi.string().min(5).max(50),
+    place: Joi.string().min(5).max(50).required(),
   });
 
   return updateMeetupSchema.validate(meetupInfo);
