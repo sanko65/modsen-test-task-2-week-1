@@ -124,14 +124,14 @@ class MeetupController {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const { id, name, description, keywords, time, place } = value;
+    const { meetup_id, name, description, keywords, time, place } = value;
 
     const meetup = await db.query("SELECT * FROM meetup WHERE meetup_id = $1", [
-      id,
+      meetup_id,
     ]);
 
     if (meetup.rows.length === 0) {
-      return res.status(404).json(`No meetup with id ${id}`);
+      return res.status(404).json(`No meetup with id ${meetup_id}`);
     }
 
     if (req.user.user_id !== meetup.rows[0].creator_id) {
@@ -140,7 +140,7 @@ class MeetupController {
 
     await db.query(
       "UPDATE meetup set name = $1, description = $2, keywords = $3, time = $4, place = $5 where meetup_id = $6 RETURNING *",
-      [name, description, keywords, time, place, id],
+      [name, description, keywords, time, place, meetup_id],
       (error, results) => {
         if (error) {
           return res.status(500).json();
@@ -150,7 +150,7 @@ class MeetupController {
         }
         return res
           .status(200)
-          .json(`Meetup with id ${id} successfully updated`);
+          .json(`Meetup with id ${meetup_id} successfully updated`);
       }
     );
   }

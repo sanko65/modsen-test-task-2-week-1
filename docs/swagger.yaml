@@ -1,4 +1,12 @@
+security:
+  - BearerAuth: []
+
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Meetup:
       type: object
@@ -6,7 +14,7 @@ components:
         -name
         -description
       properties:
-        id:
+        meetup_id:
           type: integer
           format: int64
           minimum: 1
@@ -38,29 +46,60 @@ components:
         keywords: ["Mobile app development", "iOS", "Android"]
         time: 2024-02-25T14:30:00.000Z
         place: AppSpace, 456 Oak St
-
-tags:
-  name: Meetups
-  description: Meetups managing API
+    MeetupWithoutId:
+      type: object
+      required: -name
+        -description
+      properties:
+        name:
+          type: string
+          minLength: 5
+          maxLength: 80
+        description:
+          type: string
+          minLength: 5
+          maxLength: 300
+        keywords:
+          type: array
+          items:
+            type: string
+            minLength: 2
+            maxLength: 30
+        time:
+          type: string
+          format: date-time
+        place:
+          type: string
+          minLength: 5
+          maxLength: 50
+      example:
+        name: Mobile App Development Workshop
+        description: Learn about mobile app development strategies and tools from industry experts.
+        keywords: ["Mobile app development", "iOS", "Android"]
+        time: 2024-02-25T14:30:00.000Z
+        place: AppSpace, 456 Oak St
 
 /meetups:
   get:
     summary: Get meetups
-    tags: [Meetups]
+    tags:
+      - Meetups
     description: Retrieve a list of meetups based on provided filters and sorting parameters
+    security:
+      - BearerAuth: []
     parameters:
       - in: query
         name: name
         schema:
           type: string
-          minLength: 5
+          minLength: 2
           maxLength: 80
         description: Filter by meetup name
       - in: query
         name: description
         schema:
           type: string
-          minLength: 5
+          minLength: 2
           maxLength: 300
         description: Filter by meetup description
       - in: query
@@ -69,7 +108,7 @@ tags:
           type: array
           items:
             type: string
-            minLength: 5
+            minLength: 2
             maxLength: 30
         description: Filter by meetup keywords
       - in: query
@@ -82,7 +121,7 @@ tags:
         name: place
         schema:
           type: string
-          minLength: 5
+          minLength: 2
           maxLength: 50
         description: Filter by meetup place
       - in: query
@@ -127,14 +166,17 @@ tags:
         description: Internal server error
   post:
     summary: Create a new meetup
-    tags: [Meetups]
+    tags:
+      - Meetups
     description: Create a new meetup with provided details
+    security:
+      - BearerAuth: []
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Meetup"
+            $ref: "#/components/schemas/MeetupWithoutId"
     responses:
       "201":
         description: Created meetup object
@@ -144,12 +186,19 @@ tags:
               $ref: "#/components/schemas/Meetup"
       "400":
         description: Invalid parameters
+      "401":
+        description: Unauthorized
+      "403":
+        description: You are not a moderator
       "500":
         description: Internal server error
   put:
     summary: Update a meetup
-    tags: [Meetups]
+    tags:
+      - Meetups
     description: Update a meetup with provided details
+    security:
+      - BearerAuth: []
     requestBody:
       required: true
       content:
@@ -158,7 +207,7 @@ tags:
             $ref: "#/components/schemas/Meetup"
     responses:
       "200":
-        description: Meetup successfully
+        description: Meetup successfully updated
         content:
           application/json:
             schema:
@@ -167,6 +216,10 @@ tags:
                 message:
                   type: string
                   example: Meetup with id {243424} successfully updated
+      "401":
+        description: Unauthorized
+      "403":
+        description: You are not a moderator or this is not your meetup
       "404":
         description: No meetup with this id
       "500":
@@ -175,8 +228,11 @@ tags:
 /meetups/{id}:
   get:
     summary: Get meetup by id
-    tags: [Meetups]
+    tags:
+      - Meetups
     description: Retrieve a meetup by id
+    security:
+      - BearerAuth: []
     parameters:
       - in: path
         name: id
@@ -197,12 +253,17 @@ tags:
         description: No content
       "400":
         description: Invalid id
+      "401":
+        description: Unauthorized
       "500":
         description: Internal server error
   delete:
     summary: Delete a meetup
-    tags: [Meetups]
+    tags:
+      - Meetups
     description: Delete an existing meetup by ID
+    security:
+      - BearerAuth: []
     parameters:
       - in: path
         name: id
@@ -223,7 +284,215 @@ tags:
                 message:
                   type: string
                   example: Meetup with id {12323123} successfully deleted
+      "401":
+        description: Unauthorized
+      "403":
+        description: You are not a moderator or this is not your meetup
       "404":
         description: No meetup with the specified id
       "500":
         description: Internal server error
+
+/meetups/{id}/attend:
+  post:
+    summary: Attend meetup
+    tags:
+      - Meetups
+    description: Attend a specific meetup by its ID
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID of the meetup to attend
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    responses:
+      "200":
+        description: Successfully attended meetup
+        content:
+          application/json:
+            schema:
+              type: string
+              example: You attended the meetup successfully
+      "400":
+        description: Invalid meetup ID
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid meetup ID
+      "401":
+        description: Unauthorized
+      "404":
+        description: Meetup not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: No meetup found with the specified ID
+      "500":
+        description: Internal server error
+
+/user/signup:
+  post:
+    summary: Sign up
+    tags:
+      - Auth
+    descrition: Register a new user
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - role
+              - password
+            properties:
+              email:
+                type: string
+                format: email
+              role:
+                type: string
+                enum: [user, moderator]
+              password:
+                type: string
+                minLength: 6
+                maxLength: 20
+    responses:
+      "201":
+        description: User successfully registered
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: User was added
+      "400":
+        description: Bad request, missing required parameters or invalid input
+      "500":
+        description: Internal server error
+
+/user/signin:
+  post:
+    summary: Sign in
+    tags:
+      - Auth
+    description: Log in an existing user
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                minLength: 6
+                maxLength: 20
+            required:
+              - email
+              - password
+    responses:
+      "200":
+        description: User successfully logged in
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                refreshToken:
+                  type: string
+      "204":
+        description: No content, user not found
+      "401":
+        description: Unauthorized, invalid password
+      "500":
+        description: Internal server error
+
+/user/info:
+  get:
+    summary: Take user information
+    tags:
+      - User
+    description: Retrieve information about a user
+    security:
+      - BearerAuth: []
+    responses:
+      "200":
+        description: User information retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [user, moderator]
+                attendees:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Meetup"
+                createdMeetups:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Meetup"
+      "400":
+        description: Bad request, invalid user information
+      "401":
+        description: Unauthorized
+      "500":
+        description: Internal server error
+
+/user/refreshtoken:
+  post:
+    summary: Refresh access token
+    tags:
+      - User
+    description: Refreshes the access token using a refresh token
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              refreshToken:
+                type: string
+    responses:
+      "200":
+        description: New access token generated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+      "400":
+        description: Invalid refresh token provided
+      "401":
+        description: Unauthorized, invalid refresh token or expired

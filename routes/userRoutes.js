@@ -10,7 +10,7 @@ router.get(
   userController.takeUserInfo
 );
 router.post("/signup", userController.signup);
-router.get("/signin", userController.signin);
-router.get("/refreshtoken", userController.refreshToken);
+router.post("/signin", userController.signin);
+router.post("/refreshtoken", userController.refreshToken);
 
 module.exports = router;

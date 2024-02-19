@@ -24,7 +24,7 @@ const validateCreateMeetup = (meetupInfo) => {
 
 const validateUpdateMeetup = (meetupInfo) => {
   const updateMeetupSchema = Joi.object({
-    id: Joi.number().integer().positive().required(),
+    meetup_id: Joi.number().integer().positive().required(),
     name: Joi.string().min(5).max(80).required(),
     description: Joi.string().min(5).max(300).required(),
     keywords: Joi.array()
