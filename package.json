@@ -4,7 +4,10 @@
   "description": "meetups-api",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build": "prisma generate",
+    "migrate": "npx prisma migrate dev",
+    "prebuild":"npx prisma generate"
   },
   "repository": {
     "type": "git",
@@ -16,6 +19,9 @@
     "url": "https://github.com/sanko65/modsen-test-task-2-week-1/issues"
   },
   "homepage": "https://github.com/sanko65/modsen-test-task-2-week-1#readme",
+  "prisma": {
+    "schema": "database/prisma/schema.prisma"
+  },
   "dependencies": {
     "@prisma/client": "^5.9.1",
     "bcryptjs": "^2.4.3",
