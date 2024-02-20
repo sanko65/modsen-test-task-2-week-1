@@ -1,10 +1,9 @@
-const db = require("../db");
+const prisma = require("../database/prisma");
 const validator = require("../validators/meetupValidator");
 
 class MeetupController {
   async getMeetups(req, res) {
     const fieldNames = ["name", "description", "keywords", "time", "place"];
-
     const filters = req.query;
 
     const sortFields = Array.isArray(req.query.sort_by)
@@ -15,60 +14,53 @@ class MeetupController {
       ? req.query.order
       : [req.query.order].filter(Boolean);
 
-    const limit = Number.isInteger(+req.query.limit) ? req.query.limit : 0;
-    const offset = Number.isInteger(+req.query.offset) ? req.query.offset : 0;
+    const limit = Number.isInteger(+req.query.limit)
+      ? req.query.limit
+      : undefined;
+    const offset = Number.isInteger(+req.query.offset)
+      ? req.query.offset
+      : undefined;
 
-    let filterSubquery = ``;
+    let whereClause = {};
     for (let filter in filters) {
       if (fieldNames.includes(filter)) {
-        if (filterSubquery.length) filterSubquery += " AND ";
-        if (filter === "time") {
-          filterSubquery += ` ${filter}::date = '${filters[filter]}'::date `;
-        } else if (filter === "keywords") {
-          filterSubquery += ` EXISTS (
-            SELECT *
-            FROM unnest(keywords) AS element
-            WHERE element ILIKE '%${filters[filter]}%') `;
-        } else {
-          filterSubquery += ` ${filter} ILIKE '%${filters[filter]}%' `;
-        }
+        whereClause[filter] = {
+          contains: filters[filter],
+          mode: "insensitive",
+        };
       }
     }
-    if (filterSubquery) {
-      filterSubquery = ` WHERE ${filterSubquery}`;
-    }
 
-    let sortSubquery = ` ORDER BY `;
+    let orderByClause = {};
     if (sortFields.length) {
       for (let i = 0; i < sortFields.length; i++) {
-        if (fieldNames.includes(sortFields[i])) {
-          const order = sortOrders[i] || `ASC`;
-          sortSubquery += `${sortFields[i]} ${order}`;
-          if (i !== sortFields.length - 1) {
-            sortSubquery += `, `;
-          }
+        if (
+          fieldNames.includes(sortFields[i]) ||
+          sortFields[i] === "meetup_id"
+        ) {
+          const order = sortOrders[i] || `asc`;
+          orderByClause[sortFields[i]] = order;
         }
       }
     } else {
-      sortSubquery += ` meetup_id ASC `;
+      orderByClause["meetup_id"] = "asc";
     }
 
-    let pageSubquery = ``;
-    if (limit) pageSubquery += ` LIMIT ${limit}`;
-    if (offset) pageSubquery += ` OFFSET ${offset}`;
+    try {
+      const meetups = await prisma.meetup.findMany({
+        where: whereClause,
+        orderBy: orderByClause,
+        take: limit ? +limit : undefined,
+        skip: offset ? +offset : undefined,
+      });
 
-    await db.query(
-      `SELECT * FROM meetup ${filterSubquery} ${sortSubquery}${pageSubquery}`,
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        if (!results.rows.length) {
-          return res.status(204).json();
-        }
-        return res.status(200).json(results.rows);
+      if (!meetups.length) {
+        return res.status(204).json();
       }
-    );
+      return res.status(200).json(meetups);
+    } catch (error) {
+      return res.status(500).json();
+    }
   }
 
   async getMeetupsById(req, res) {
@@ -80,19 +72,21 @@ class MeetupController {
 
     const { id } = value;
 
-    await db.query(
-      "SELECT * FROM meetup WHERE meetup_id = $1",
-      [id],
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        if (!results.rows.length) {
-          return res.status(204).json();
-        }
-        return res.status(200).json(results.rows[0]);
+    try {
+      const meetup = await prisma.meetup.findUnique({
+        where: {
+          meetup_id: parseInt(id),
+        },
+      });
+
+      if (!meetup) {
+        return res.status(204).json();
       }
-    );
+
+      return res.status(200).json(meetup);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 
   async createMeetup(req, res) {
@@ -106,14 +100,20 @@ class MeetupController {
     const { user_id } = req.user;
 
     try {
-      const newMeetup = await db.query(
-        "INSERT INTO meetup (name, description, keywords, time, place, creator_id) values ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [name, description, keywords, time, place, user_id]
-      );
+      const newMeetup = await prisma.meetup.create({
+        data: {
+          name,
+          description,
+          keywords: { set: keywords },
+          time,
+          place,
+          creator_id: user_id,
+        },
+      });
 
-      return res.status(201).json(newMeetup.rows[0]);
+      return res.status(201).json(newMeetup);
     } catch (error) {
-      return res.status(500).json();
+      return res.status(500).json({ message: "Internal server error" });
     }
   }
 
@@ -126,33 +126,40 @@ class MeetupController {
 
     const { meetup_id, name, description, keywords, time, place } = value;
 
-    const meetup = await db.query("SELECT * FROM meetup WHERE meetup_id = $1", [
-      meetup_id,
-    ]);
+    try {
+      const meetup = await prisma.meetup.findUnique({
+        where: {
+          meetup_id: parseInt(meetup_id),
+        },
+      });
 
-    if (meetup.rows.length === 0) {
-      return res.status(404).json(`No meetup with id ${meetup_id}`);
-    }
-
-    if (req.user.user_id !== meetup.rows[0].creator_id) {
-      return res.status(403).json("You are not the creator of this meetup");
-    }
-
-    await db.query(
-      "UPDATE meetup set name = $1, description = $2, keywords = $3, time = $4, place = $5 where meetup_id = $6 RETURNING *",
-      [name, description, keywords, time, place, meetup_id],
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        if (!results.rowCount) {
-          return res.status(404).json(`No meetup with id ${id}`);
-        }
-        return res
-          .status(200)
-          .json(`Meetup with id ${meetup_id} successfully updated`);
+      if (!meetup) {
+        return res.status(404).json(`No meetup with id ${meetup_id}`);
       }
-    );
+
+      if (req.user.user_id !== meetup.creator_id) {
+        return res.status(403).json("You are not the creator of this meetup");
+      }
+
+      await prisma.meetup.update({
+        where: {
+          meetup_id: parseInt(meetup_id),
+        },
+        data: {
+          name,
+          description,
+          keywords: { set: keywords },
+          time,
+          place,
+        },
+      });
+
+      return res
+        .status(200)
+        .json(`Meetup with id ${meetup_id} successfully updated`);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 
   async deleteMeetup(req, res) {
@@ -164,33 +171,37 @@ class MeetupController {
 
     const { id } = value;
 
-    const meetup = await db.query("SELECT * FROM meetup WHERE meetup_id = $1", [
-      id,
-    ]);
+    try {
+      const meetup = await prisma.meetup.findUnique({
+        where: {
+          meetup_id: parseInt(id),
+        },
+      });
 
-    if (meetup.rows.length === 0) {
-      return res.status(404).json(`No meetup with id ${id}`);
-    }
-
-    if (req.user.user_id !== meetup.rows[0].creator_id) {
-      return res.status(403).json("You are not the creator of this meetup");
-    }
-
-    await db.query(
-      "DELETE FROM meetup where meetup_id = $1",
-      [id],
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        if (!results.rowCount) {
-          return res.status(404).json(`No meetup with id ${id}`);
-        }
-        return res
-          .status(200)
-          .json(`Meetup with id ${id} successfully deleted`);
+      if (!meetup) {
+        return res.status(404).json(`No meetup with id ${id}`);
       }
-    );
+
+      if (req.user.user_id !== meetup.creator_id) {
+        return res.status(403).json("You are not the creator of this meetup");
+      }
+
+      await prisma.attendees.deleteMany({
+        where: {
+          meetup_id: parseInt(id),
+        },
+      });
+
+      await prisma.meetup.delete({
+        where: {
+          meetup_id: parseInt(id),
+        },
+      });
+
+      return res.status(200).json(`Meetup with id ${id} successfully deleted`);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 
   async attendMeetup(req, res) {
@@ -203,21 +214,28 @@ class MeetupController {
     const { id: meetup_id } = value;
     const { user_id } = req.user;
 
-    await db.query(
-      "INSERT INTO attendees (user_id, meetup_id) VALUES($1, $2)",
-      [user_id, meetup_id],
-      (error, results) => {
-        if (error) {
-          return res.status(500).json();
-        }
-        if (!results.rowCount) {
-          return res.status(404).json(`No meetup with id ${meetup_id}`);
-        }
-        return res
-          .status(200)
-          .json(`You attend to meetup with id ${meetup_id}`);
+    try {
+      const meetup = await prisma.meetup.findUnique({
+        where: {
+          meetup_id: parseInt(meetup_id),
+        },
+      });
+
+      if (!meetup) {
+        return res.status(404).json(`No meetup with id ${meetup_id}`);
       }
-    );
+
+      await prisma.attendees.create({
+        data: {
+          user_id: parseInt(user_id),
+          meetup_id: parseInt(meetup_id),
+        },
+      });
+
+      return res.status(200).json(`You attend to meetup with id ${meetup_id}`);
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 }
 

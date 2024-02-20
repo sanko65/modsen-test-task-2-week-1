@@ -103,21 +103,6 @@ components:
           maxLength: 300
         description: Filter by meetup description
       - in: query
-        name: keywords
-        schema:
-          type: array
-          items:
-            type: string
-            minLength: 2
-            maxLength: 30
-        description: Filter by meetup keywords
-      - in: query
-        name: time
-        schema:
-          type: string
-          format: date-time
-        description: Filter by meetup time
-      - in: query
         name: place
         schema:
           type: string
@@ -129,15 +114,15 @@ components:
         schema:
           type: string
         description:
-          Field to sort by. Can be `name`, `description`, `keywords`, `time`, `place`.
+          Field to sort by. Can be `meetup_id`, `name`, `description`, `keywords`, `time`, `place`.
           Multiple values can be passed to sort by multiple fields.
       - in: query
         name: order
         schema:
           type: string
-          enum: [ASC, DESC]
+          enum: [asc, desc]
         description:
-          Sort order. Can be `ASC` for ascending or `DESC` for descending.
+          Sort order. Can be `asc` for ascending or `desc` for descending.
           Corresponding to the fields passed in `sort_by`.
       - in: query
         name: limit
