@@ -328,7 +328,7 @@ components:
       "500":
         description: Internal server error
 
-/user/signup:
+/auth/signup:
   post:
     summary: Sign up
     tags:
@@ -371,7 +371,7 @@ components:
       "500":
         description: Internal server error
 
-/user/signin:
+/auth/signin:
   post:
     summary: Sign in
     tags:

@@ -14,16 +14,6 @@ router.get(
   requestWrap(userController.takeUserInfo)
 );
 router.post(
-  "/signup",
-  validation(validatorSchemas.signupSchema, "body"),
-  requestWrap(userController.signup)
-);
-router.post(
-  "/signin",
-  validation(validatorSchemas.signinSchema, "body"),
-  requestWrap(userController.signin)
-);
-router.post(
   "/refreshtoken",
   validation(validatorSchemas.refreshTokenSchema, "body"),
   requestWrap(userController.refreshToken)
