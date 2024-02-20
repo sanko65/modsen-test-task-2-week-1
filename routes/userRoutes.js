@@ -3,6 +3,7 @@ const passport = require("passport");
 const validation = require("../middleware/validation");
 const validatorSchemas = require("../validators/userValidator");
 const userController = require("../controllers/userController");
+const requestWrap = require("../middleware/requestWrap");
 
 const router = new Router();
 
@@ -10,22 +11,22 @@ router.get(
   "/info",
   passport.authenticate("jwt", { session: false }),
   validation(validatorSchemas.takeUserInfoSchema, "user"),
-  userController.takeUserInfo
+  requestWrap(userController.takeUserInfo)
 );
 router.post(
   "/signup",
   validation(validatorSchemas.signupSchema, "body"),
-  userController.signup
+  requestWrap(userController.signup)
 );
 router.post(
   "/signin",
   validation(validatorSchemas.signinSchema, "body"),
-  userController.signin
+  requestWrap(userController.signin)
 );
 router.post(
   "/refreshtoken",
   validation(validatorSchemas.refreshTokenSchema, "body"),
-  userController.refreshToken
+  requestWrap(userController.refreshToken)
 );
 
 module.exports = router;

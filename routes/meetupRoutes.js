@@ -5,44 +5,45 @@ const validatorSchemas = require("../validators/meetupValidator");
 const validation = require("../middleware/validation");
 const meetupController = require("../controllers/meetupController");
 const checkRole = require("../middleware/checkRole");
+const requestWrap = require("../middleware/requestWrap");
 
 router.get(
   "/meetups",
   passport.authenticate("jwt", { session: false }),
-  meetupController.getMeetups
+  requestWrap(meetupController.getMeetups)
 );
 router.get(
   "/meetups/:id",
   passport.authenticate("jwt", { session: false }),
   validation(validatorSchemas.meetupIdSchema, "params"),
-  meetupController.getMeetupsById
+  requestWrap(meetupController.getMeetupsById)
 );
 router.post(
   "/meetups",
   passport.authenticate("jwt", { session: false }),
   checkRole,
   validation(validatorSchemas.createMeetupSchema, "body"),
-  meetupController.createMeetup
+  requestWrap(meetupController.createMeetup)
 );
 router.put(
   "/meetups",
   passport.authenticate("jwt", { session: false }),
   checkRole,
   validation(validatorSchemas.updateMeetupSchema, "body"),
-  meetupController.updateMeetup
+  requestWrap(meetupController.updateMeetup)
 );
 router.delete(
   "/meetups/:id",
   passport.authenticate("jwt", { session: false }),
   checkRole,
   validation(validatorSchemas.meetupIdSchema, "params"),
-  meetupController.deleteMeetup
+  requestWrap(meetupController.deleteMeetup)
 );
 router.post(
   "/meetups/:id/attend",
   passport.authenticate("jwt", { session: false }),
   validation(validatorSchemas.meetupIdSchema, "params"),
-  meetupController.attendMeetup
+  requestWrap(meetupController.attendMeetup)
 );
 
 module.exports = router;
