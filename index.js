@@ -2,11 +2,11 @@ const express = require("express");
 require("dotenv").config();
 const swaggerUi = require("swagger-ui-express");
 const passport = require("passport");
-const swaggerConfig = require("./configs/swaggerConfig");
+const swaggerConfig = require("./src/configs/swaggerConfig");
 
-const meetupRouter = require("./routes/meetupRoutes");
-const userRouter = require("./routes/userRoutes");
-const authRouter = require("./routes/authRoutes");
+const meetupRouter = require("./src/routes/meetupRoutes");
+const userRouter = require("./src/routes/userRoutes");
+const authRouter = require("./src/routes/authRoutes");
 
 const app = express();
 const PORT = parseInt(process.env.PORT) || 3000;
@@ -18,7 +18,7 @@ app.use(
 );
 
 app.use(passport.initialize());
-require("./middleware/passport")(passport);
+require("./src/middleware/passport")(passport);
 
 app.use(express.json());
 app.use("/api", meetupRouter);
