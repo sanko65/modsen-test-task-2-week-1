@@ -1,5 +1,4 @@
 const prisma = require("../database/prisma");
-const validator = require("../validators/meetupValidator");
 
 class MeetupController {
   async getMeetups(req, res) {
@@ -64,13 +63,7 @@ class MeetupController {
   }
 
   async getMeetupsById(req, res) {
-    const { error, value } = validator.validateMeetupId(req.params);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { id } = value;
+    const { id } = req.validatedData;
 
     try {
       const meetup = await prisma.meetup.findUnique({
@@ -90,13 +83,7 @@ class MeetupController {
   }
 
   async createMeetup(req, res) {
-    const { error, value } = validator.validateCreateMeetup(req.body);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { name, description, keywords, time, place } = value;
+    const { name, description, keywords, time, place } = req.validatedData;
     const { user_id } = req.user;
 
     try {
@@ -118,13 +105,8 @@ class MeetupController {
   }
 
   async updateMeetup(req, res) {
-    const { error, value } = validator.validateUpdateMeetup(req.body);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { meetup_id, name, description, keywords, time, place } = value;
+    const { meetup_id, name, description, keywords, time, place } =
+      req.validatedData;
 
     try {
       const meetup = await prisma.meetup.findUnique({
@@ -163,13 +145,7 @@ class MeetupController {
   }
 
   async deleteMeetup(req, res) {
-    const { error, value } = validator.validateMeetupId(req.params);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { id } = value;
+    const { id } = req.validatedData;
 
     try {
       const meetup = await prisma.meetup.findUnique({
@@ -205,13 +181,7 @@ class MeetupController {
   }
 
   async attendMeetup(req, res) {
-    const { error, value } = validator.validateMeetupId(req.params);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { id: meetup_id } = value;
+    const { id: meetup_id } = req.validatedData;
     const { user_id } = req.user;
 
     try {

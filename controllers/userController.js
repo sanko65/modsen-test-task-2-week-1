@@ -1,17 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const prisma = require("../database/prisma");
-const validator = require("../validators/userValidator");
 
 class UserController {
   async signup(req, res) {
-    const { error, value } = validator.validateSignup(req.body);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { email, role, password } = value;
+    const { email, role, password } = req.validatedData;
 
     const hash_password = bcrypt.hashSync(password, 15);
 
@@ -30,13 +23,7 @@ class UserController {
   }
 
   async signin(req, res) {
-    const { error, value } = validator.validateSignin(req.body);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { email, password } = value;
+    const { email, password } = req.validatedData;
 
     try {
       const user = await prisma.user.findUnique({
@@ -96,13 +83,7 @@ class UserController {
   }
 
   async takeUserInfo(req, res) {
-    const { error, value } = validator.validateTakeUserInfo(req.user);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { user_id, email, role } = value;
+    const { user_id, email, role } = req.validatedData;
 
     try {
       let attendeesMeetups;
@@ -141,13 +122,7 @@ class UserController {
   }
 
   async refreshToken(req, res) {
-    const { error, value } = validator.validateRefreshToken(req.body);
-
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    const { refreshToken } = value;
+    const { refreshToken } = req.validatedData;
 
     try {
       const { id, email } = jwt.verify(
