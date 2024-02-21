@@ -21,12 +21,6 @@ app.use(express.json());
 
 app.use(router);
 
-app.get("/", (req, res) =>
-  res.status(200).json({
-    "try this link": "https://meetup-api-c2965ab81300.herokuapp.com/api/docs/",
-  })
-);
-
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}.`);
 });
