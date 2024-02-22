@@ -1,5 +1,5 @@
-const { StatusCodes } = require("http-status-codes");
+const { NotFoundError } = require("../errors/index");
 
 module.exports = function notFoundHandler(req, res, next) {
-  res.status(StatusCodes.NOT_FOUND).json({ message: "There is no such route" });
+  throw new NotFoundError("There is no such route");
 };

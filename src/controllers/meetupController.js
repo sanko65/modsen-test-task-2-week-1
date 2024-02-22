@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("./services/meetupService");
+const { BadRequestError } = require("../errors/index");
 
 class MeetupController {
   async getMeetups(req, res) {
@@ -37,7 +38,7 @@ class MeetupController {
       place,
       user_id
     );
-    if (!newMeetup) res.satus(StatusCodes.BAD_REQUEST);
+    if (!newMeetup) throw new BadRequestError("Meetup wasn't added");
 
     return res.status(StatusCodes.CREATED).json(newMeetup);
   }
@@ -47,7 +48,7 @@ class MeetupController {
       req.validatedData;
     const user_id = req.user.user_id;
 
-    const updateResult = await service.updateMeetup(
+    await service.updateMeetup(
       meetup_id,
       name,
       description,
@@ -56,15 +57,6 @@ class MeetupController {
       place,
       user_id
     );
-
-    if (updateResult === "404")
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json(`No meetup with id ${meetup_id}`);
-    if (updateResult === "403")
-      return res
-        .status(StatusCodes.FORBIDDEN)
-        .json("You are not the creator of this meetup");
 
     return res
       .status(StatusCodes.OK)
@@ -75,17 +67,7 @@ class MeetupController {
     const { id } = req.validatedData;
     const { user_id } = req.user;
 
-    const deleteResult = await service.deleteMeetup(id, user_id);
-
-    if (deleteResult === "404") {
-      return res.status(StatusCodes.NOT_FOUND).json(`No meetup with id ${id}`);
-    }
-
-    if (deleteResult === "403") {
-      return res
-        .status(StatusCodes.FORBIDDEN)
-        .json("You are not the creator of this meetup");
-    }
+    await service.deleteMeetup(id, user_id);
 
     return res
       .status(StatusCodes.OK)
@@ -96,16 +78,10 @@ class MeetupController {
     const { id: meetup_id } = req.validatedData;
     const { user_id } = req.user;
 
-    const attendResult = await service.attendMeetup(meetup_id, user_id);
-
-    if (attendResult === "404") {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json(`No meetup with id ${meetup_id}`);
-    }
+    await service.attendMeetup(meetup_id, user_id);
 
     return res
-      .status(StatusCodes.NOT_FOUND)
+      .status(StatusCodes.OK)
       .json(`You attend to meetup with id ${meetup_id}`);
   }
 }

@@ -1,10 +1,10 @@
-const { StatusCodes } = require("http-status-codes");
+const { ForbiddenError } = require("../errors/index");
 
 module.exports = function checkRole(req, res, next) {
   if (req.user.role !== "moderator") {
-    return res
-      .status(StatusCodes.FORBIDDEN)
-      .json("You can only attend to meetups");
+    throw new ForbiddenError(
+      "You are not a moderator. You can only attend to meetups."
+    );
   }
   next();
 };

@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("./services/userService");
+const { UnauthorizedError } = require("../errors/index");
 
 class UserController {
   async takeUserInfo(req, res) {
@@ -16,11 +17,6 @@ class UserController {
     const { refreshToken } = req.validatedData;
 
     const accessToken = await service.refreshAccessToken(refreshToken);
-
-    if (!accessToken)
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json({ message: "Problem with refresh token" });
 
     return res.status(StatusCodes.OK).json({
       accessToken: `Bearer ${accessToken}`,

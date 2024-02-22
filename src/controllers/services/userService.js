@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const repo = require("../repositories/userRepo");
+const { UnauthorizedError } = require("../../errors/index");
 
 class UserService {
   async takeUserInfo(user_id, email, role) {
@@ -23,7 +24,7 @@ class UserService {
     const user = await repo.takeUserByRefreshToken(id, email, refreshToken);
 
     if (!user) {
-      return null;
+      throw new UnauthorizedError("Problem with refresh token");
     }
 
     return jwt.sign({ id, email }, process.env.JWT_ACCESS_KEY, {

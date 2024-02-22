@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const repo = require("../repositories/authRepo");
+const { UnauthorizedError } = require("../../errors/index");
 
 class AuthService {
   async signup(email, role, password) {
@@ -13,13 +14,13 @@ class AuthService {
     const user = await repo.findUserByEmail(email);
 
     if (!user) {
-      return null;
+      throw new UnauthorizedError("Invalid email or password");
     }
 
     const isValidPassword = bcrypt.compareSync(password, user.password);
 
     if (!isValidPassword) {
-      return null;
+      throw new UnauthorizedError("Invalid email or password");
     }
 
     const accessToken = jwt.sign(

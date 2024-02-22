@@ -1,3 +1,4 @@
+const { BadRequestError, ForbiddenError } = require("../../errors/index");
 const repo = require("../repositories/meetupRepo");
 
 class MeetupService {
@@ -72,11 +73,11 @@ class MeetupService {
     const meetup = await repo.getMeetupsById(meetup_id);
 
     if (!meetup) {
-      return "404";
+      throw new BadRequestError(`No meetup with id ${meetup_id}`);
     }
 
     if (user_id !== meetup.creator_id) {
-      return "403";
+      throw new ForbiddenError("You are not the creator of this meetup");
     }
 
     await repo.updateMeetup(
@@ -93,12 +94,11 @@ class MeetupService {
     const meetup = await repo.getMeetupsById(meetup_id);
 
     if (!meetup) {
-      return "404";
+      throw new BadRequestError(`No meetup with id ${meetup_id}`);
     }
 
-    console.log(user_id, meetup.creator_id);
     if (user_id !== meetup.creator_id) {
-      return "403";
+      throw new ForbiddenError("You are not the creator of this meetup");
     }
 
     await repo.deleteMeetupFromUttendees(meetup_id);
@@ -110,7 +110,7 @@ class MeetupService {
     const meetup = repo.getMeetupsById(meetup_id);
 
     if (!meetup) {
-      return "404";
+      throw new BadRequestError(`No meetup with id ${meetup_id}`);
     }
 
     await repo.attendMeetup(meetup_id, user_id);

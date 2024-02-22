@@ -1,13 +1,11 @@
-import { StatusCodes } from "http-status-codes";
+const { BadRequestError } = require("../errors/index");
 
 module.exports = function validation(schema, source) {
   return function (req, res, next) {
     const { error, value } = schema.validate(req[source]);
 
     if (error) {
-      return res
-        .status(StatusCodes.OK)
-        .json({ message: error.details[0].message });
+      throw new BadRequestError("Invalid data provided");
     }
 
     req.validatedData = value;

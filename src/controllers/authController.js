@@ -15,12 +15,6 @@ class UserController {
 
     const authResult = await service.signin(email, password);
 
-    if (!authResult) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .json("Invalid email or password");
-    }
-
     return res.status(StatusCodes.OK).json({
       accessToken: `Bearer ${authResult.accessToken}`,
       refreshToken: authResult.refreshToken,
