@@ -1,21 +1,24 @@
 const Router = require("express");
 const passport = require("passport");
 const validation = require("../middleware/validation");
-const validatorSchemas = require("../validators/userValidator");
 const userController = require("../controllers/userController");
 const requestWrap = require("../middleware/requestWrap");
+const {
+  takeUserInfoSchema,
+  refreshTokenSchema,
+} = require("../validators/user/index");
 
 const router = new Router();
 
 router.get(
   "/info",
   passport.authenticate("jwt", { session: false }),
-  validation(validatorSchemas.takeUserInfoSchema, "user"),
+  validation(takeUserInfoSchema, "user"),
   requestWrap(userController.takeUserInfo)
 );
 router.post(
   "/refreshtoken",
-  validation(validatorSchemas.refreshTokenSchema, "body"),
+  validation(refreshTokenSchema, "body"),
   requestWrap(userController.refreshToken)
 );
 

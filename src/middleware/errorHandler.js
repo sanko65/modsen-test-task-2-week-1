@@ -7,7 +7,6 @@ const {
 } = require("../errors/index");
 
 module.exports = function errorHandler(err, req, res, next) {
-  console.log(err);
   if (err instanceof BadRequestError) {
     return res.status(err.statusCode).json({ message: err.message });
   }
@@ -20,6 +19,7 @@ module.exports = function errorHandler(err, req, res, next) {
   if (err instanceof UnauthorizedError) {
     return res.status(err.statusCode).json({ message: err.message });
   }
+  console.log(err);
   return res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)
     .json({ message: "Internal Server Error" });
