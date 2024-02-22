@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("./services/meetupService");
 const { BadRequestError } = require("../errors/index");
+const Response = require("../response/Response");
 
 class MeetupController {
   async getMeetups(req, res) {
@@ -11,7 +12,7 @@ class MeetupController {
     if (!meetups.length) {
       return res.status(StatusCodes.NO_CONTENT).json();
     }
-    return res.status(StatusCodes.OK).json(meetups);
+    return res.status(StatusCodes.OK).json(new Response(meetups));
   }
 
   async getMeetupsById(req, res) {
@@ -23,7 +24,7 @@ class MeetupController {
       return res.status(StatusCodes.NO_CONTENT).json();
     }
 
-    return res.status(StatusCodes.OK).json(meetup);
+    return res.status(StatusCodes.OK).json(new Response(meetup));
   }
 
   async createMeetup(req, res) {
@@ -40,7 +41,7 @@ class MeetupController {
     );
     if (!newMeetup) throw new BadRequestError("Meetup wasn't added");
 
-    return res.status(StatusCodes.CREATED).json(newMeetup);
+    return res.status(StatusCodes.CREATED).json(new Response(newMeetup));
   }
 
   async updateMeetup(req, res) {
@@ -60,7 +61,7 @@ class MeetupController {
 
     return res
       .status(StatusCodes.OK)
-      .json(`Meetup with id ${meetup_id} successfully updated`);
+      .json(new Response(`Meetup with id ${meetup_id} successfully updated`));
   }
 
   async deleteMeetup(req, res) {
@@ -71,7 +72,7 @@ class MeetupController {
 
     return res
       .status(StatusCodes.OK)
-      .json(`Meetup with id ${id} successfully deleted`);
+      .json(new Response(`Meetup with id ${id} successfully deleted`));
   }
 
   async attendMeetup(req, res) {
@@ -82,7 +83,7 @@ class MeetupController {
 
     return res
       .status(StatusCodes.OK)
-      .json(`You attend to meetup with id ${meetup_id}`);
+      .json(new Response(`You attend to meetup with id ${meetup_id}`));
   }
 }
 

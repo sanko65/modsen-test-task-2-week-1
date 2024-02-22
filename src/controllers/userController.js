@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("./services/userService");
-const { UnauthorizedError } = require("../errors/index");
+const Response = require("../response/Response");
 
 class UserController {
   async takeUserInfo(req, res) {
@@ -8,9 +8,7 @@ class UserController {
 
     const userInfo = await service.takeUserInfo(user_id, email, role);
 
-    return res.status(StatusCodes.OK).json({
-      userInfo,
-    });
+    return res.status(StatusCodes.OK).json(new Response(userInfo));
   }
 
   async refreshToken(req, res) {
@@ -18,9 +16,11 @@ class UserController {
 
     const accessToken = await service.refreshAccessToken(refreshToken);
 
-    return res.status(StatusCodes.OK).json({
-      accessToken: `Bearer ${accessToken}`,
-    });
+    return res.status(StatusCodes.OK).json(
+      new Response({
+        accessToken: `Bearer ${accessToken}`,
+      })
+    );
   }
 }
 
