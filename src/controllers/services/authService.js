@@ -1,10 +1,16 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const repo = require("../repositories/authRepo");
-const { UnauthorizedError } = require("../../errors/index");
+const { UnauthorizedError, BadRequestError } = require("../../errors/index");
 
 class AuthService {
   async signup(email, role, password) {
+    const user = await repo.findUserByEmail(email);
+
+    if (user) {
+      throw new BadRequestError("Invalid email or password");
+    }
+
     const hash_password = bcrypt.hashSync(password, 15);
 
     await repo.createUser(email, role, hash_password);

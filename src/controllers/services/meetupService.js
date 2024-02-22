@@ -107,10 +107,18 @@ class MeetupService {
   }
 
   async attendMeetup(meetup_id, user_id) {
-    const meetup = repo.getMeetupsById(meetup_id);
+    const meetup = await repo.getMeetupsById(meetup_id);
 
     if (!meetup) {
       throw new BadRequestError(`No meetup with id ${meetup_id}`);
+    }
+
+    const isAttendMeetup = await repo.checkAttendMeetup(meetup_id, user_id);
+
+    if (isAttendMeetup) {
+      throw new BadRequestError(
+        `You already attend to meetup with id: ${meetup_id}`
+      );
     }
 
     await repo.attendMeetup(meetup_id, user_id);
