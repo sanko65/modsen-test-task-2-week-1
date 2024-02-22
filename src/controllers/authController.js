@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const service = require("./services/authService");
 
 class UserController {
@@ -6,7 +7,7 @@ class UserController {
 
     await service.signup(email, role, password);
 
-    return res.status(201).json("User was added");
+    return res.status(StatusCodes.CREATED).json("User was added");
   }
 
   async signin(req, res) {
@@ -15,10 +16,12 @@ class UserController {
     const authResult = await service.signin(email, password);
 
     if (!authResult) {
-      return res.status(401).json("Invalid email or password");
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json("Invalid email or password");
     }
 
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       accessToken: `Bearer ${authResult.accessToken}`,
       refreshToken: authResult.refreshToken,
     });
