@@ -1,7 +1,7 @@
 const Router = require("express");
-const validation = require("../middleware/validation");
+const validation = require("../common/middleware/validation");
 const authController = require("../controllers/authController");
-const requestWrap = require("../middleware/requestWrap");
+const requestWrap = require("../common/middleware/requestWrap");
 const { signupSchema, signinSchema } = require("../validators/auth/index");
 
 const router = new Router();

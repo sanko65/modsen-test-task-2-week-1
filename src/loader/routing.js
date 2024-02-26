@@ -3,8 +3,8 @@ const Router = require("express");
 const meetupRouter = require("../routes/meetupRoutes");
 const userRouter = require("../routes/userRoutes");
 const authRouter = require("../routes/authRoutes");
-const notFound = require("../middleware/notFound");
-const errorHandler = require("../middleware/errorHandler");
+const notFound = require("../common/middleware/notFound");
+const errorHandler = require("../common/middleware/errorHandler");
 
 const router = new Router();
 

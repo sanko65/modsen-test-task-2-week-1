@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
-const service = require("./services/meetupService");
-const { BadRequestError } = require("../errors/index");
-const Response = require("../response/Response");
+const service = require("../services/meetupService");
+const { BadRequestError } = require("../common/errors/index");
+const Response = require("../common/response/Response");
 
 class MeetupController {
   async getMeetups(req, res) {

@@ -1,10 +1,10 @@
 const Router = require("express");
 const passport = require("passport");
 const router = new Router();
-const validation = require("../middleware/validation");
+const validation = require("../common/middleware/validation");
 const meetupController = require("../controllers/meetupController");
-const checkRole = require("../middleware/checkRole");
-const requestWrap = require("../middleware/requestWrap");
+const checkRole = require("../common/middleware/checkRole");
+const requestWrap = require("../common/middleware/requestWrap");
 const {
   meetupIdSchema,
   createMeetupSchema,

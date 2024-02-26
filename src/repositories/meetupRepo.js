@@ -1,12 +1,12 @@
-const prisma = require("../../database/prisma");
+const prisma = require("../database/prisma");
 
 class MeetupRepo {
   async getMeetups(whereClause, orderByClause, limit, offset) {
     return await prisma.meetup.findMany({
       where: whereClause,
       orderBy: orderByClause,
-      take: limit ? +limit : undefined,
-      skip: offset ? +offset : undefined,
+      take: limit ? Number(limit) : undefined,
+      skip: offset ? Number(offset) : undefined,
     });
   }
 

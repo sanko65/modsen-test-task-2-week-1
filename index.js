@@ -15,7 +15,7 @@ app.use(
 );
 
 app.use(passport.initialize());
-require("./src/middleware/passport")(passport);
+require("./src/common/middleware/passport")(passport);
 
 app.use(express.json());
 

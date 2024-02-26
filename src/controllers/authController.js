@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
-const service = require("./services/authService");
-const Response = require("../response/Response");
+const service = require("../services/authService");
+const Response = require("../common/response/Response");
 
 class UserController {
   async signup(req, res) {

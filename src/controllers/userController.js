@@ -1,6 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
-const service = require("./services/userService");
-const Response = require("../response/Response");
+const service = require("../services/userService");
+const Response = require("../common/response/Response");
 
 class UserController {
   async takeUserInfo(req, res) {

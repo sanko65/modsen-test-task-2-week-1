@@ -1,7 +1,13 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const {
+  createAccessToken,
+  createRefreshToken,
+} = require("../common/helpers/createJWt");
 const repo = require("../repositories/authRepo");
-const { UnauthorizedError, BadRequestError } = require("../../errors/index");
+const {
+  UnauthorizedError,
+  BadRequestError,
+} = require("../common/errors/index");
 
 class AuthService {
   async signup(email, role, password) {
@@ -29,27 +35,12 @@ class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    const accessToken = jwt.sign(
-      {
-        id: user.user_id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_ACCESS_KEY,
-      {
-        expiresIn: +process.env.JWT_EXPIRATION,
-      }
-    );
-    const refreshToken = jwt.sign(
-      {
-        id: user.user_id,
-        email: user.email,
-        role: user.role,
-      },
-      process.env.JWT_REFRESH_KEY,
-      {
-        expiresIn: +process.env.JWT_REFRESH_EXPIRATION,
-      }
+    const accessToken = createAccessToken(user.user_id, user.email, user.role);
+
+    const refreshToken = createRefreshToken(
+      user.user_id,
+      user.email,
+      user.role
     );
 
     await repo.updateUserRefreshToken(user.user_id, refreshToken);

@@ -1,4 +1,4 @@
-const prisma = require("../../database/prisma");
+const prisma = require("../database/prisma");
 
 class UserRepo {
   async takeUserAttendees(user_id) {

@@ -1,4 +1,8 @@
-const { BadRequestError, ForbiddenError } = require("../../errors/index");
+const { BadRequestError, ForbiddenError } = require("../common/errors/index");
+const {
+  getOrderByClause,
+  getWhereClause,
+} = require("../common/helpers/getMeetupsHelper");
 const repo = require("../repositories/meetupRepo");
 
 class MeetupService {
@@ -13,35 +17,16 @@ class MeetupService {
       ? filters.order
       : [filters.order].filter(Boolean);
 
-    const limit = Number.isInteger(+filters.limit) ? filters.limit : undefined;
-    const offset = Number.isInteger(+filters.offset)
+    const limit = Number.isInteger(Number(filters.limit))
+      ? filters.limit
+      : undefined;
+    const offset = Number.isInteger(Number(filters.offset))
       ? filters.offset
       : undefined;
 
-    let whereClause = {};
-    for (let filter in filters) {
-      if (fieldNames.includes(filter)) {
-        whereClause[filter] = {
-          contains: filters[filter],
-          mode: "insensitive",
-        };
-      }
-    }
+    const whereClause = getWhereClause(filters, fieldNames);
 
-    let orderByClause = {};
-    if (sortFields.length) {
-      for (let i = 0; i < sortFields.length; i++) {
-        if (
-          fieldNames.includes(sortFields[i]) ||
-          sortFields[i] === "meetup_id"
-        ) {
-          const order = sortOrders[i] || `asc`;
-          orderByClause[sortFields[i]] = order;
-        }
-      }
-    } else {
-      orderByClause["meetup_id"] = "asc";
-    }
+    const orderByClause = getOrderByClause(sortFields, fieldNames, sortOrders);
 
     return await repo.getMeetups(whereClause, orderByClause, limit, offset);
   }

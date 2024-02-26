@@ -1,8 +1,8 @@
 const Router = require("express");
 const passport = require("passport");
-const validation = require("../middleware/validation");
+const validation = require("../common/middleware/validation");
 const userController = require("../controllers/userController");
-const requestWrap = require("../middleware/requestWrap");
+const requestWrap = require("../common/middleware/requestWrap");
 const {
   takeUserInfoSchema,
   refreshTokenSchema,
