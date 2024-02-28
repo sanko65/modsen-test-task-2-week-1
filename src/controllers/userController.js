@@ -22,6 +22,27 @@ class UserController {
       })
     );
   }
+
+  async uploadLogo(req, res) {
+    const { user_id } = req.validatedData;
+    const logoBuffer = req.file.buffer;
+
+    await service.uploadLogo(user_id, logoBuffer);
+
+    return res
+      .status(StatusCodes.OK)
+      .json(new Response("User logo was uploaded"));
+  }
+
+  async deleteLogo(req, res) {
+    const { user_id, email } = req.validatedData;
+
+    await service.deleteLogo(user_id, email);
+
+    return res
+      .status(StatusCodes.OK)
+      .json(new Response("User logo was deleted"));
+  }
 }
 
 module.exports = new UserController();

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
+    "test": "jest",
     "build": "prisma generate",
     "migrate": "npx prisma migrate dev",
     "prebuild": "npx prisma generate"
@@ -20,9 +21,10 @@
   },
   "homepage": "https://github.com/sanko65/modsen-test-task-2-week-1#readme",
   "prisma": {
-    "schema": "database/prisma/schema.prisma"
+    "schema": "src/database/prisma/schema.prisma"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
     "@prisma/client": "^5.9.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.1",
@@ -31,6 +33,7 @@
     "http-status-codes": "^2.3.0",
     "joi": "^17.12.1",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^5.10.0",
@@ -38,6 +41,8 @@
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "supertest": "^6.3.4"
   }
 }
