@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/sanko65/modsen-test-task-2-week-1#readme",
   "prisma": {
-    "schema": "src/database/prisma/schema.prisma"
+    "schema": "src/database/prisma/schema.prisma",
+    "seed": "node src/database/seed.js"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.7.0",
