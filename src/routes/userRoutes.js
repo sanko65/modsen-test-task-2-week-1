@@ -19,7 +19,7 @@ router.get(
 );
 router.post(
   "/refreshtoken",
-  validation(refreshTokenSchema, "body"),
+  validation(refreshTokenSchema, "cookies"),
   requestWrap(userController.refreshToken)
 );
 router.post(

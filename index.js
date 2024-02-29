@@ -4,6 +4,7 @@ const swaggerUi = require("swagger-ui-express");
 const passport = require("passport");
 const swaggerConfig = require("./src/configs/swaggerConfig");
 const router = require("./src/loader/routing");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const PORT = parseInt(process.env.PORT) || 3000;
@@ -18,6 +19,7 @@ app.use(passport.initialize());
 require("./src/common/middleware/passport")(passport);
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(router);
 

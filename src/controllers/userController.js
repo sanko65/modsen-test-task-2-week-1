@@ -16,11 +16,11 @@ class UserController {
 
     const accessToken = await service.refreshAccessToken(refreshToken);
 
-    return res.status(StatusCodes.OK).json(
-      new Response({
-        accessToken: `Bearer ${accessToken}`,
-      })
-    );
+    res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 300000 });
+
+    return res
+      .status(StatusCodes.OK)
+      .json(new Response("Access token refreshed successfully"));
   }
 
   async uploadLogo(req, res) {

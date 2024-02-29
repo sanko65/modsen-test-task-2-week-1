@@ -1,9 +1,9 @@
 const JwtStrategy = require("passport-jwt").Strategy;
-const ExtractJwt = require("passport-jwt").ExtractJwt;
 const prisma = require("../../database/prisma");
+const cookieExtractor = require("../helpers/cookieExtractor");
 
 const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_ACCESS_KEY,
 };
 

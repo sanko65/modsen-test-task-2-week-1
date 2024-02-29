@@ -16,14 +16,16 @@ class UserController {
   async signin(req, res) {
     const { email, password } = req.validatedData;
 
-    const authResult = await service.signin(email, password);
+    const { accessToken, refreshToken } = await service.signin(email, password);
 
-    return res.status(StatusCodes.OK).json(
-      new Response({
-        accessToken: `Bearer ${authResult.accessToken}`,
-        refreshToken: authResult.refreshToken,
-      })
-    );
+    res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 300000 });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 600000,
+    });
+
+    return res.status(StatusCodes.OK).json(new Response("Success signin"));
   }
 }
 
