@@ -9,7 +9,7 @@
     "build": "prisma generate",
     "migrate": "npx prisma migrate deploy",
     "prebuild": "npx prisma generate",
-    "postinstall": "npx prisma migrate deploy --name 0_init && npm run migrate && npx prisma db seed"
+    "postinstall": "npx prisma db push --accept-data-loss && npx prisma db seed"
   },
   "repository": {
     "type": "git",
