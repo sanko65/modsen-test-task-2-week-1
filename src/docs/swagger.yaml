@@ -1,12 +1,4 @@
-security:
-  - BearerAuth: []
-
 components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
   schemas:
     Meetup:
       type: object
@@ -44,7 +36,7 @@ components:
         name: Mobile App Development Workshop
         description: Learn about mobile app development strategies and tools from industry experts.
         keywords: ["Mobile app development", "iOS", "Android"]
-        time: 2024-02-25T14:30:00.000Z
+        time: 2028-02-25T14:30:00.000Z
         place: AppSpace, 456 Oak St
     MeetupWithoutId:
       type: object
@@ -76,7 +68,7 @@ components:
         name: Mobile App Development Workshop
         description: Learn about mobile app development strategies and tools from industry experts.
         keywords: ["Mobile app development", "iOS", "Android"]
-        time: 2024-02-25T14:30:00.000Z
+        time: 2028-02-25T14:30:00.000Z
         place: AppSpace, 456 Oak St
 
 /meetups:
@@ -85,8 +77,6 @@ components:
     tags:
       - Meetups
     description: Retrieve a list of meetups based on provided filters and sorting parameters
-    security:
-      - BearerAuth: []
     parameters:
       - in: query
         name: name
@@ -147,6 +137,8 @@ components:
                 $ref: "#/components/schemas/Meetup"
       "204":
         description: No content
+      "401":
+        description: Unauthorized
       "500":
         description: Internal server error
   post:
@@ -154,8 +146,6 @@ components:
     tags:
       - Meetups
     description: Create a new meetup with provided details
-    security:
-      - BearerAuth: []
     requestBody:
       required: true
       content:
@@ -170,7 +160,7 @@ components:
             schema:
               $ref: "#/components/schemas/Meetup"
       "400":
-        description: Invalid parameters
+        description: Meetup wasn't added
       "401":
         description: Unauthorized
       "403":
@@ -182,8 +172,6 @@ components:
     tags:
       - Meetups
     description: Update a meetup with provided details
-    security:
-      - BearerAuth: []
     requestBody:
       required: true
       content:
@@ -193,18 +181,10 @@ components:
     responses:
       "200":
         description: Meetup successfully updated
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Meetup with id {243424} successfully updated
       "401":
         description: Unauthorized
       "403":
-        description: You are not a moderator or this is not your meetup
+        description: You are not the creator of this meetup
       "404":
         description: No meetup with this id
       "500":
@@ -216,8 +196,6 @@ components:
     tags:
       - Meetups
     description: Retrieve a meetup by id
-    security:
-      - BearerAuth: []
     parameters:
       - in: path
         name: id
@@ -247,8 +225,6 @@ components:
     tags:
       - Meetups
     description: Delete an existing meetup by ID
-    security:
-      - BearerAuth: []
     parameters:
       - in: path
         name: id
@@ -261,14 +237,6 @@ components:
     responses:
       "200":
         description: Meetup successfully deleted
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Meetup with id {12323123} successfully deleted
       "401":
         description: Unauthorized
       "403":
@@ -284,8 +252,6 @@ components:
     tags:
       - Meetups
     description: Attend a specific meetup by its ID
-    security:
-      - BearerAuth: []
     parameters:
       - in: path
         name: id
@@ -298,42 +264,21 @@ components:
     responses:
       "200":
         description: Successfully attended meetup
-        content:
-          application/json:
-            schema:
-              type: string
-              example: You attended the meetup successfully
       "400":
         description: Invalid meetup ID
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: Invalid meetup ID
       "401":
         description: Unauthorized
       "404":
         description: Meetup not found
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: No meetup found with the specified ID
       "500":
         description: Internal server error
 
 /auth/signup:
   post:
-    summary: Sign up
+    summary: User Registration
     tags:
       - Auth
-    descrition: Register a new user
+    descrition: Registers a new user with the provided email, role, and password
     requestBody:
       required: true
       content:
@@ -367,16 +312,16 @@ components:
                   type: string
                   example: User was added
       "400":
-        description: Bad request, missing required parameters or invalid input
+        description: Invalid email or password
       "500":
         description: Internal server error
 
 /auth/signin:
   post:
-    summary: Sign in
+    summary: User Sign-in
     tags:
       - Auth
-    description: Log in an existing user
+    description: Signs in a user with the provided email and password, and returns access and refresh tokens in cookies
     requestBody:
       required: true
       content:
@@ -396,20 +341,9 @@ components:
               - password
     responses:
       "200":
-        description: User successfully logged in
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                accessToken:
-                  type: string
-                refreshToken:
-                  type: string
-      "204":
-        description: No content, user not found
+        description: Success signin
       "401":
-        description: Unauthorized, invalid password
+        description: Invalid email or password
       "500":
         description: Internal server error
 
@@ -419,8 +353,6 @@ components:
     tags:
       - User
     description: Retrieve information about a user
-    security:
-      - BearerAuth: []
     responses:
       "200":
         description: User information retrieved successfully
@@ -445,39 +377,64 @@ components:
                   type: array
                   items:
                     $ref: "#/components/schemas/Meetup"
-      "400":
-        description: Bad request, invalid user information
+                logo_url:
+                  type: string
       "401":
         description: Unauthorized
       "500":
         description: Internal server error
 
 /user/refreshtoken:
-  post:
+  get:
     summary: Refresh access token
     tags:
       - User
-    description: Refreshes the access token using a refresh token
+    description: Refreshes the access token using a refresh token in cookies
+    responses:
+      "200":
+        description: Access token refreshed successfully
+      "401":
+        description: Unauthorized, invalid refresh token or expired
+      "500":
+        description: Internal server error
+
+/user/uploadlogo:
+  post:
+    summary: Upload user logo
+    tags:
+      - User
+    description: Uploads a user logo
     requestBody:
-      required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             properties:
-              refreshToken:
+              picture:
                 type: string
+                format: binary
     responses:
       "200":
-        description: New access token generated successfully
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                accessToken:
-                  type: string
+        description: User logo was uploaded
       "400":
-        description: Invalid refresh token provided
+        description: Problem with upload logo
       "401":
-        description: Unauthorized, invalid refresh token or expired
+        description: Unauthorized
+      "500":
+        description: Internal server error
+
+/user/deletelogo:
+  delete:
+    summary: Delete user logo
+    tags:
+      - User
+    description: Deletes a user logo
+    responses:
+      "200":
+        description: User logo was deleted
+      "400":
+        description: Problem with delete logo
+      "401":
+        description: Unauthorized
+      "500":
+        description: Internal server error

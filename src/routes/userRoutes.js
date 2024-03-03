@@ -17,7 +17,7 @@ router.get(
   validation(takeUserInfoSchema, "user"),
   requestWrap(userController.takeUserInfo)
 );
-router.post(
+router.get(
   "/refreshtoken",
   validation(refreshTokenSchema, "cookies"),
   requestWrap(userController.refreshToken)

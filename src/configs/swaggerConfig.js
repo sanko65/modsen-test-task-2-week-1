@@ -5,7 +5,7 @@ const options = {
     openapi: "3.1.0",
     info: {
       title: "Meetup API",
-      version: "0.2.0",
+      version: "0.3.0",
     },
     servers: [
       {
