@@ -34,7 +34,7 @@ class UserRepo {
       where: { user_id },
       data: {
         logo_url: fileName
-          ? `https://storage.googleapis.com/meetup_api_logo_bucket/logos/${fileName}`
+          ? `${process.env.GC_BUCKET_PUBLIC_LINK}${fileName}`
           : null,
       },
     });

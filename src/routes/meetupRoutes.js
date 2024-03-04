@@ -25,21 +25,21 @@ router.get(
 router.post(
   "/meetups",
   passport.authenticate("jwt", { session: false }),
-  checkRole,
+  checkRole(["moderator"]),
   validation(createMeetupSchema, "body"),
   requestWrap(meetupController.createMeetup)
 );
 router.put(
   "/meetups",
   passport.authenticate("jwt", { session: false }),
-  checkRole,
+  checkRole(["moderator"]),
   validation(updateMeetupSchema, "body"),
   requestWrap(meetupController.updateMeetup)
 );
 router.delete(
   "/meetups/:id",
   passport.authenticate("jwt", { session: false }),
-  checkRole,
+  checkRole(["moderator"]),
   validation(meetupIdSchema, "params"),
   requestWrap(meetupController.deleteMeetup)
 );

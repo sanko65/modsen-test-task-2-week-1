@@ -15,7 +15,7 @@ const gcloudFileStream = function () {
 
   const storage = new Storage(config);
 
-  const bucketName = "meetup_api_logo_bucket";
+  const bucketName = process.env.GC_BUCKET_NAME;
 
   const filePath = `logos/${fileName}`;
 

@@ -1,7 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("../services/meetupService");
 const { BadRequestError } = require("../common/errors/index");
-const Response = require("../common/response/Response");
+const sendResponce = require("../common/helpers/sendResponce");
 
 class MeetupController {
   async getMeetups(req, res) {
@@ -10,9 +10,9 @@ class MeetupController {
     const meetups = await service.getMeetups(filters);
 
     if (!meetups.length) {
-      return res.status(StatusCodes.NO_CONTENT).json();
+      return sendResponce(res, StatusCodes.NO_CONTENT);
     }
-    return res.status(StatusCodes.OK).json(new Response(meetups));
+    return sendResponce(res, StatusCodes.OK, meetups);
   }
 
   async getMeetupsById(req, res) {
@@ -21,10 +21,9 @@ class MeetupController {
     const meetup = await service.getMeetupsById(id);
 
     if (!meetup) {
-      return res.status(StatusCodes.NO_CONTENT).json();
+      return sendResponce(res, StatusCodes.NO_CONTENT);
     }
-
-    return res.status(StatusCodes.OK).json(new Response(meetup));
+    return sendResponce(res, StatusCodes.OK, meetup);
   }
 
   async createMeetup(req, res) {
@@ -41,7 +40,7 @@ class MeetupController {
     );
     if (!newMeetup) throw new BadRequestError("Meetup wasn't added");
 
-    return res.status(StatusCodes.CREATED).json(new Response(newMeetup));
+    return sendResponce(res, StatusCodes.CREATED, newMeetup);
   }
 
   async updateMeetup(req, res) {
@@ -59,9 +58,11 @@ class MeetupController {
       user_id
     );
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response(`Meetup with id ${meetup_id} successfully updated`));
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      `Meetup with id ${meetup_id} successfully updated`
+    );
   }
 
   async deleteMeetup(req, res) {
@@ -70,9 +71,11 @@ class MeetupController {
 
     await service.deleteMeetup(id, user_id);
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response(`Meetup with id ${id} successfully deleted`));
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      `Meetup with id ${id} successfully deleted`
+    );
   }
 
   async attendMeetup(req, res) {
@@ -81,9 +84,11 @@ class MeetupController {
 
     await service.attendMeetup(meetup_id, user_id);
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response(`You attend to meetup with id ${meetup_id}`));
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      `You attend to meetup with id ${meetup_id}`
+    );
   }
 }
 

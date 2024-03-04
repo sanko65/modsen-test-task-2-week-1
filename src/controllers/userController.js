@@ -1,6 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("../services/userService");
-const Response = require("../common/response/Response");
+const sendResponce = require("../common/helpers/sendResponce");
+const setCookie = require("../common/helpers/setCookie");
 
 class UserController {
   async takeUserInfo(req, res) {
@@ -8,7 +9,7 @@ class UserController {
 
     const userInfo = await service.takeUserInfo(user_id, email, role);
 
-    return res.status(StatusCodes.OK).json(new Response(userInfo));
+    return sendResponce(res, StatusCodes.OK, userInfo);
   }
 
   async refreshToken(req, res) {
@@ -16,11 +17,13 @@ class UserController {
 
     const accessToken = await service.refreshAccessToken(refreshToken);
 
-    res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: 300000 });
+    res = setCookie(res, "accessToken", accessToken);
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response("Access token refreshed successfully"));
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      "Access token refreshed successfully"
+    );
   }
 
   async uploadLogo(req, res) {
@@ -29,9 +32,7 @@ class UserController {
 
     await service.uploadLogo(user_id, logoBuffer);
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response("User logo was uploaded"));
+    return sendResponce(res, StatusCodes.OK, "User logo was uploaded");
   }
 
   async deleteLogo(req, res) {
@@ -39,9 +40,7 @@ class UserController {
 
     await service.deleteLogo(user_id, email);
 
-    return res
-      .status(StatusCodes.OK)
-      .json(new Response("User logo was deleted"));
+    return sendResponce(res, StatusCodes.OK, "User logo was deleted");
   }
 }
 
