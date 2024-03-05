@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const repo = require("../repositories/userRepo");
 const { createAccessToken } = require("../common/helpers/createJWt");
-const { fileName, gcStream } = require("../common/helpers/uploadLogoHelper");
+const gcloudFileStream = require("../common/helpers/uploadLogoHelper");
 const {
   UnauthorizedError,
   UploadLogoError,
@@ -50,15 +50,18 @@ class UserService {
 
   async uploadLogo(user_id, logoBuffer) {
     if (!logoBuffer) throw new UploadLogoError("Problem with upload logo");
-
-    gcStream.end(logoBuffer);
+    const { fileName, gcStream } = gcloudFileStream();
 
     await new Promise((resolve, reject) => {
+      gcStream.write(logoBuffer);
+      gcStream.end();
       gcStream.on("finish", resolve);
       gcStream.on("error", reject);
     }).catch(() => {
       throw new UploadLogoError("Problem with upload logo");
     });
+
+    gcStream.destroy();
 
     const updatedUser = await repo.takeUserWithUpdatedLogo(user_id, fileName);
 

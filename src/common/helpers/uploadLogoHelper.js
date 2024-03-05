@@ -32,4 +32,4 @@ const gcloudFileStream = function () {
   return { fileName, gcStream };
 };
 
-module.exports = gcloudFileStream();
+module.exports = gcloudFileStream;
