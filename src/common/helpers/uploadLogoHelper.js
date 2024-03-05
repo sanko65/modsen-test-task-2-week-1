@@ -12,6 +12,7 @@ const gcloudFileStream = function () {
     type: process.env.GC_TYPE,
     universe_domain: process.env.GC_UNIVERSE_DOMAIN,
   };
+  console.log(config);
 
   const storage = new Storage({
     projectId: process.env.GC_QUOTA_PROJECT_ID,
@@ -21,6 +22,7 @@ const gcloudFileStream = function () {
   const bucketName = process.env.GC_BUCKET_NAME;
 
   const filePath = `logos/${fileName}`;
+  console.log(storage, bucketName, filePath);
 
   const options = {
     metadata: {
