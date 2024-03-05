@@ -12,12 +12,19 @@ const gcloudFileStream = function () {
     type: process.env.GC_TYPE,
     universe_domain: process.env.GC_UNIVERSE_DOMAIN,
   };
-  console.log(config);
 
-  const storage = new Storage({
-    projectId: process.env.GC_QUOTA_PROJECT_ID,
-    config,
-  });
+  let storage;
+  if (process.env.NODE_ENV === "production") {
+    storage = new Storage({
+      projectId: process.env.GC_QUOTA_PROJECT_ID,
+      keyFilename: "../../../creds.json",
+    });
+  } else {
+    storage = new Storage({
+      projectId: process.env.GC_QUOTA_PROJECT_ID,
+      config,
+    });
+  }
 
   const bucketName = process.env.GC_BUCKET_NAME;
 

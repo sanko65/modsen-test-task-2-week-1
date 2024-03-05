@@ -9,7 +9,7 @@
     "build": "prisma generate",
     "migrate": "npx prisma migrate deploy",
     "prebuild": "npx prisma generate",
-    "postinstall": "npx prisma db push --accept-data-loss && npx prisma db seed"
+    "postinstall": "npx prisma db push --accept-data-loss && npx prisma db seed && node src/common/helpers/createCreds.js"
   },
   "repository": {
     "type": "git",
