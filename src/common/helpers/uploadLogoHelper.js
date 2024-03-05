@@ -17,7 +17,7 @@ const gcloudFileStream = function () {
   if (process.env.NODE_ENV === "production") {
     storage = new Storage({
       projectId: process.env.GC_QUOTA_PROJECT_ID,
-      keyFilename: "../../../creds.json",
+      keyFilename: "creds.json",
     });
   } else {
     storage = new Storage({
