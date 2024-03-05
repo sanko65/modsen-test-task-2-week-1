@@ -13,7 +13,10 @@ const gcloudFileStream = function () {
     universe_domain: process.env.GC_UNIVERSE_DOMAIN,
   };
 
-  const storage = new Storage(config);
+  const storage = new Storage({
+    projectId: process.env.GC_QUOTA_PROJECT_ID,
+    config,
+  });
 
   const bucketName = process.env.GC_BUCKET_NAME;
 
