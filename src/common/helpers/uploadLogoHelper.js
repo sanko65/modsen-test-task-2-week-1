@@ -29,7 +29,6 @@ const gcloudFileStream = function () {
   const bucketName = process.env.GC_BUCKET_NAME;
 
   const filePath = `logos/${fileName}`;
-  console.log(storage, bucketName, filePath);
 
   const options = {
     metadata: {

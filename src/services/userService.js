@@ -57,15 +57,13 @@ class UserService {
       gcStream.end();
       gcStream.on("finish", resolve);
       gcStream.on("error", reject);
-    }).catch((err) => {
-      console.log(err);
+    }).catch(() => {
       throw new UploadLogoError("Problem with upload logo");
     });
 
     gcStream.destroy();
 
     const updatedUser = await repo.takeUserWithUpdatedLogo(user_id, fileName);
-    console.log(updatedUser);
 
     if (!updatedUser.logo_url)
       throw new UploadLogoError("Problem with upload logo");

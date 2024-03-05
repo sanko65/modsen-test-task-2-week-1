@@ -10,7 +10,6 @@ const config = {
   type: process.env.GC_TYPE,
   universe_domain: process.env.GC_UNIVERSE_DOMAIN,
 };
-console.log(config);
 
 try {
   fs.writeFileSync("creds.json", JSON.stringify(config));
