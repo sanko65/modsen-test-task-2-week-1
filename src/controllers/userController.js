@@ -1,12 +1,13 @@
 const { StatusCodes } = require("http-status-codes");
-const service = require("../services/userService");
+const { takeUserInfo } = require("../services/userService");
+const { uploadLogo, deleteLogo } = require("../services/logoService");
 const sendResponce = require("../common/helpers/sendResponce");
 
 class UserController {
   async takeUserInfo(req, res) {
     const { user_id, email, role } = req.validatedData;
 
-    const userInfo = await service.takeUserInfo(user_id, email, role);
+    const userInfo = await takeUserInfo(user_id, email, role);
 
     return sendResponce(res, StatusCodes.OK, userInfo);
   }
@@ -15,7 +16,7 @@ class UserController {
     const { user_id } = req.validatedData;
     const logoBuffer = req.file.buffer;
 
-    await service.uploadLogo(user_id, logoBuffer);
+    await uploadLogo(user_id, logoBuffer);
 
     return sendResponce(res, StatusCodes.OK, "User logo was uploaded");
   }
@@ -23,7 +24,7 @@ class UserController {
   async deleteLogo(req, res) {
     const { user_id, email } = req.validatedData;
 
-    await service.deleteLogo(user_id, email);
+    await deleteLogo(user_id, email);
 
     return sendResponce(res, StatusCodes.OK, "User logo was deleted");
   }

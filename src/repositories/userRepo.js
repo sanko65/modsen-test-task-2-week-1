@@ -17,29 +17,10 @@ class UserRepo {
     });
   }
 
-  async takeUserWithUpdatedLogo(user_id, fileName) {
-    return await prisma.user.update({
-      where: { user_id },
-      data: {
-        logo_url: fileName
-          ? `${process.env.GC_BUCKET_PUBLIC_LINK}${fileName}`
-          : null,
-      },
-    });
-  }
-
   async takeUserLogoUrl(user_id) {
     return await prisma.user.findUnique({
       where: { user_id },
       select: { logo_url: true },
-    });
-  }
-
-  async findUserByEmail(email) {
-    return await prisma.user.findUnique({
-      where: {
-        email,
-      },
     });
   }
 }
