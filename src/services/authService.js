@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const {
   createAccessToken,
   createRefreshToken,
@@ -45,6 +46,21 @@ class AuthService {
 
     await repo.updateUserRefreshToken(user.user_id, refreshToken);
     return { accessToken, refreshToken };
+  }
+
+  async refreshAccessToken(refreshToken) {
+    const { id, email, role } = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_KEY
+    );
+
+    const user = await repo.takeUserByRefreshToken(id, email, refreshToken);
+
+    if (!user) {
+      throw new UnauthorizedError("Problem with refresh token");
+    }
+
+    return createAccessToken(id, email, role);
   }
 }
 

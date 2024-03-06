@@ -347,6 +347,20 @@ components:
       "500":
         description: Internal server error
 
+/auth/refreshtoken:
+  get:
+    summary: Refresh access token
+    tags:
+      - Auth
+    description: Refreshes the access token using a refresh token in cookies
+    responses:
+      "200":
+        description: Access token refreshed successfully
+      "401":
+        description: Unauthorized, invalid refresh token or expired
+      "500":
+        description: Internal server error
+
 /user/info:
   get:
     summary: Take user information
@@ -381,20 +395,6 @@ components:
                   type: string
       "401":
         description: Unauthorized
-      "500":
-        description: Internal server error
-
-/user/refreshtoken:
-  get:
-    summary: Refresh access token
-    tags:
-      - User
-    description: Refreshes the access token using a refresh token in cookies
-    responses:
-      "200":
-        description: Access token refreshed successfully
-      "401":
-        description: Unauthorized, invalid refresh token or expired
       "500":
         description: Internal server error
 

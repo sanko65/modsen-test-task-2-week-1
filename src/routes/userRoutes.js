@@ -4,10 +4,7 @@ const validation = require("../common/middleware/validation");
 const upload = require("../common/middleware/multer");
 const userController = require("../controllers/userController");
 const requestWrap = require("../common/middleware/requestWrap");
-const {
-  takeUserInfoSchema,
-  refreshTokenSchema,
-} = require("../validators/user/index");
+const { takeUserInfoSchema } = require("../validators/user/index");
 
 const router = new Router();
 
@@ -16,11 +13,6 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   validation(takeUserInfoSchema, "user"),
   requestWrap(userController.takeUserInfo)
-);
-router.get(
-  "/refreshtoken",
-  validation(refreshTokenSchema, "cookies"),
-  requestWrap(userController.refreshToken)
 );
 router.post(
   "/uploadlogo",

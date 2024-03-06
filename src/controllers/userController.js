@@ -1,7 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const service = require("../services/userService");
 const sendResponce = require("../common/helpers/sendResponce");
-const setCookie = require("../common/helpers/setCookie");
 
 class UserController {
   async takeUserInfo(req, res) {
@@ -10,20 +9,6 @@ class UserController {
     const userInfo = await service.takeUserInfo(user_id, email, role);
 
     return sendResponce(res, StatusCodes.OK, userInfo);
-  }
-
-  async refreshToken(req, res) {
-    const { refreshToken } = req.validatedData;
-
-    const accessToken = await service.refreshAccessToken(refreshToken);
-
-    res = setCookie(res, "accessToken", accessToken);
-
-    return sendResponce(
-      res,
-      StatusCodes.OK,
-      "Access token refreshed successfully"
-    );
   }
 
   async uploadLogo(req, res) {

@@ -29,6 +29,18 @@ class AuthRepo {
       },
     });
   }
+
+  async takeUserByRefreshToken(id, email, refreshToken) {
+    return await prisma.user.findFirst({
+      where: {
+        AND: [
+          { user_id: parseInt(id) },
+          { email: email },
+          { refresh_token: refreshToken },
+        ],
+      },
+    });
+  }
 }
 
 module.exports = new AuthRepo();

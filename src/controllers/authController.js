@@ -26,6 +26,20 @@ class UserController {
 
     return sendResponce(res, StatusCodes.OK, "Success signin");
   }
+
+  async refreshToken(req, res) {
+    const { refreshToken } = req.validatedData;
+
+    const accessToken = await service.refreshAccessToken(refreshToken);
+
+    res = setCookie(res, "accessToken", accessToken);
+
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      "Access token refreshed successfully"
+    );
+  }
 }
 
 module.exports = new UserController();

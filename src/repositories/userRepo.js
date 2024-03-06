@@ -17,18 +17,6 @@ class UserRepo {
     });
   }
 
-  async takeUserByRefreshToken(id, email, refreshToken) {
-    return await prisma.user.findFirst({
-      where: {
-        AND: [
-          { user_id: parseInt(id) },
-          { email: email },
-          { refresh_token: refreshToken },
-        ],
-      },
-    });
-  }
-
   async takeUserWithUpdatedLogo(user_id, fileName) {
     return await prisma.user.update({
       where: { user_id },

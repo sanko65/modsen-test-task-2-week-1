@@ -2,7 +2,11 @@ const Router = require("express");
 const validation = require("../common/middleware/validation");
 const authController = require("../controllers/authController");
 const requestWrap = require("../common/middleware/requestWrap");
-const { signupSchema, signinSchema } = require("../validators/auth/index");
+const {
+  signupSchema,
+  signinSchema,
+  refreshTokenSchema,
+} = require("../validators/auth/index");
 
 const router = new Router();
 
@@ -15,6 +19,11 @@ router.post(
   "/signin",
   validation(signinSchema, "body"),
   requestWrap(authController.signin)
+);
+router.get(
+  "/refreshtoken",
+  validation(refreshTokenSchema, "cookies"),
+  requestWrap(authController.refreshToken)
 );
 
 module.exports = router;
