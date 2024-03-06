@@ -19,7 +19,7 @@ class MeetupRepo {
   }
 
   async createMeetup(name, description, keywords, time, place, user_id) {
-    return await prisma.meetup.create({
+    return prisma.meetup.create({
       data: {
         name,
         description,
@@ -27,6 +27,15 @@ class MeetupRepo {
         time,
         place,
         creator_id: user_id,
+      },
+    });
+  }
+
+  async attendMeetup(meetup_id, user_id) {
+    return prisma.attendees.create({
+      data: {
+        user_id: parseInt(user_id),
+        meetup_id: parseInt(meetup_id),
       },
     });
   }
@@ -46,23 +55,23 @@ class MeetupRepo {
     });
   }
 
-  async deleteMeetupFromUttendees(id) {
-    await prisma.attendees.deleteMany({
+  deleteMeetupFromUttendees(id) {
+    return prisma.attendees.deleteMany({
       where: {
         meetup_id: parseInt(id),
       },
     });
   }
 
-  async deleteMeetup(id) {
-    await prisma.meetup.delete({
+  deleteMeetup(id) {
+    return prisma.meetup.delete({
       where: {
         meetup_id: parseInt(id),
       },
     });
   }
 
-  async attendMeetup(meetup_id, user_id) {
+  async asyncAttendMeetup(meetup_id, user_id) {
     await prisma.attendees.create({
       data: {
         user_id: parseInt(user_id),

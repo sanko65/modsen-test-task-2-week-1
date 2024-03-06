@@ -5,6 +5,8 @@ const ForbiddenError = require("./ForbiddenError");
 const UnauthorizedError = require("./UnauthorizedError");
 const UploadLogoError = require("./UploadLogoError");
 const DeleteLogoError = require("./DeleteLogoError");
+const DeleteMeetupError = require("./DeleteMeetupError");
+const CreateMeetupError = require("./CreateMeetupError");
 
 module.exports = {
   BaseError,
@@ -14,4 +16,6 @@ module.exports = {
   UnauthorizedError,
   UploadLogoError,
   DeleteLogoError,
+  DeleteMeetupError,
+  CreateMeetupError,
 };

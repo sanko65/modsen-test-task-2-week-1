@@ -1,8 +1,14 @@
-const { BadRequestError, ForbiddenError } = require("../common/errors/index");
+const {
+  BadRequestError,
+  ForbiddenError,
+  DeleteMeetupError,
+  CreateMeetupError,
+} = require("../common/errors/index");
 const {
   getOrderByClause,
   getWhereClause,
 } = require("../common/helpers/getMeetupsHelper");
+const prisma = require("../database/prisma");
 const repo = require("../repositories/meetupRepo");
 
 class MeetupService {
@@ -36,14 +42,26 @@ class MeetupService {
   }
 
   async createMeetup(name, description, keywords, time, place, user_id) {
-    return await repo.createMeetup(
-      name,
-      description,
-      keywords,
-      time,
-      place,
-      user_id
-    );
+    let createdMeetup;
+
+    try {
+      createdMeetup = await prisma.$transaction(async () => {
+        const meetup = await repo.createMeetup(
+          name,
+          description,
+          keywords,
+          time,
+          place,
+          user_id
+        );
+        await repo.attendMeetup(meetup.meetup_id, user_id);
+        return meetup;
+      });
+    } catch {
+      throw new CreateMeetupError("Smth went wrong with create meetup");
+    }
+
+    return createdMeetup;
   }
 
   async updateMeetup(
@@ -86,9 +104,14 @@ class MeetupService {
       throw new ForbiddenError("You are not the creator of this meetup");
     }
 
-    await repo.deleteMeetupFromUttendees(meetup_id);
-
-    await repo.deleteMeetup(meetup_id);
+    try {
+      await prisma.$transaction([
+        repo.deleteMeetupFromUttendees(meetup_id),
+        repo.deleteMeetup(meetup_id),
+      ]);
+    } catch {
+      throw new DeleteMeetupError("Smth went wrong with delete meetup");
+    }
   }
 
   async attendMeetup(meetup_id, user_id) {
@@ -106,7 +129,7 @@ class MeetupService {
       );
     }
 
-    await repo.attendMeetup(meetup_id, user_id);
+    await repo.asyncAttendMeetup(meetup_id, user_id);
   }
 
   async leaveMeetup(meetup_id, user_id) {
