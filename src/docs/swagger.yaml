@@ -273,6 +273,33 @@ components:
       "500":
         description: Internal server error
 
+/meetups/{id}/leave:
+  post:
+    summary: Leave meetup
+    tags:
+      - Meetups
+    description: Leave a specific meetup by its ID
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: ID of the meetup to leave
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+    responses:
+      "200":
+        description: Successfully attended meetup
+      "400":
+        description: Invalid meetup ID
+      "401":
+        description: Unauthorized
+      "404":
+        description: Meetup not found
+      "500":
+        description: Internal server error
+
 /auth/signup:
   post:
     summary: User Registration

@@ -81,6 +81,17 @@ class MeetupRepo {
       },
     });
   }
+
+  async leaveMeetup(meetup_id, user_id) {
+    await prisma.attendees.delete({
+      where: {
+        user_id_meetup_id: {
+          user_id: parseInt(user_id),
+          meetup_id: parseInt(meetup_id),
+        },
+      },
+    });
+  }
 }
 
 module.exports = new MeetupRepo();

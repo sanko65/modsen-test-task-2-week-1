@@ -49,5 +49,11 @@ router.post(
   validation(meetupIdSchema, "params"),
   requestWrap(meetupController.attendMeetup)
 );
+router.post(
+  "/meetups/:id/leave",
+  passport.authenticate("jwt", { session: false }),
+  validation(meetupIdSchema, "params"),
+  requestWrap(meetupController.leaveMeetup)
+);
 
 module.exports = router;

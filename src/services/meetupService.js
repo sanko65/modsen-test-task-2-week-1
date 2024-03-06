@@ -108,6 +108,30 @@ class MeetupService {
 
     await repo.attendMeetup(meetup_id, user_id);
   }
+
+  async leaveMeetup(meetup_id, user_id) {
+    const meetup = await repo.getMeetupsById(meetup_id);
+
+    if (!meetup) {
+      throw new BadRequestError(`No meetup with id ${meetup_id}`);
+    }
+
+    if (meetup.creator_id === user_id) {
+      throw new BadRequestError(
+        `You can not leave, as you creator of this meetup`
+      );
+    }
+
+    const isAttendMeetup = await repo.checkAttendMeetup(meetup_id, user_id);
+
+    if (!isAttendMeetup) {
+      throw new BadRequestError(
+        `You are not follow to meetup with id: ${meetup_id}`
+      );
+    }
+
+    await repo.leaveMeetup(meetup_id, user_id);
+  }
 }
 
 module.exports = new MeetupService();

@@ -90,6 +90,19 @@ class MeetupController {
       `You attend to meetup with id ${meetup_id}`
     );
   }
+
+  async leaveMeetup(req, res) {
+    const { id: meetup_id } = req.validatedData;
+    const { user_id } = req.user;
+
+    await service.leaveMeetup(meetup_id, user_id);
+
+    return sendResponce(
+      res,
+      StatusCodes.OK,
+      `You leave meetup with id ${meetup_id}`
+    );
+  }
 }
 
 module.exports = new MeetupController();
