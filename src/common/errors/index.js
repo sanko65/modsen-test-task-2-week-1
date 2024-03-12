@@ -7,6 +7,7 @@ const UploadLogoError = require("./UploadLogoError");
 const DeleteLogoError = require("./DeleteLogoError");
 const DeleteMeetupError = require("./DeleteMeetupError");
 const CreateMeetupError = require("./CreateMeetupError");
+const RedisError = require("./RedisError");
 
 module.exports = {
   BaseError,
@@ -18,4 +19,5 @@ module.exports = {
   DeleteLogoError,
   DeleteMeetupError,
   CreateMeetupError,
+  RedisError,
 };

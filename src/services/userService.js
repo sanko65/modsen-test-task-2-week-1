@@ -1,7 +1,17 @@
 const repo = require("../repositories/userRepo");
+const {
+  getDataFromCache,
+  setDataToCache,
+} = require("../common/helpers/cacheHelper");
 
 class UserService {
   async takeUserInfo(user_id, email, role) {
+    const cachedUser = await getDataFromCache(`user:${user_id}`);
+
+    if (cachedUser) {
+      return JSON.parse(cachedUser);
+    }
+
     let attendeesMeetups;
     let createdMeetups;
 
@@ -15,7 +25,7 @@ class UserService {
 
     let { logo_url } = await repo.takeUserLogoUrl(user_id);
 
-    return {
+    const userInfo = {
       user_id,
       email,
       role,
@@ -23,6 +33,14 @@ class UserService {
       createdMeetups,
       logo_url,
     };
+
+    await setDataToCache(
+      `user:${user_id}`,
+      JSON.stringify(userInfo),
+      process.env.CACHED_EXPIRATION
+    );
+
+    return userInfo;
   }
 }
 

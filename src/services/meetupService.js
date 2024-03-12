@@ -4,6 +4,7 @@ const {
   DeleteMeetupError,
   CreateMeetupError,
 } = require("../common/errors/index");
+const { getDataFromCache } = require("../common/helpers/cacheHelper");
 const {
   getOrderByClause,
   getWhereClause,
@@ -14,6 +15,11 @@ const repo = require("../repositories/meetupRepo");
 class MeetupService {
   async getMeetups(filters) {
     const fieldNames = ["name", "description", "keywords", "time", "place"];
+
+    if (Object.keys(filters).length === 0) {
+      const cachedAllMeetups = await getDataFromCache(`allMeetups`);
+      if (cachedAllMeetups) return JSON.parse(cachedAllMeetups);
+    }
 
     const sortFields = Array.isArray(filters.sort_by)
       ? filters.sort_by
@@ -34,11 +40,40 @@ class MeetupService {
 
     const orderByClause = getOrderByClause(sortFields, fieldNames, sortOrders);
 
-    return await repo.getMeetups(whereClause, orderByClause, limit, offset);
+    const meetups = await repo.getMeetups(
+      whereClause,
+      orderByClause,
+      limit,
+      offset
+    );
+
+    if (Object.keys(filters).length === 0) {
+      await setDataToCache(
+        `allMeetups`,
+        JSON.stringify(meetups),
+        process.env.CACHED_EXPIRATION
+      );
+    }
+
+    return meetups;
   }
 
   async getMeetupsById(id) {
-    return await repo.getMeetupsById(id);
+    const cachedMeetup = await getDataFromCache(`meetup:${id}`);
+
+    if (cachedMeetup) {
+      return JSON.parse(meetup);
+    }
+
+    const meetup = await repo.getMeetupsById(id);
+
+    await setDataToCache(
+      `meetup:${id}`,
+      JSON.stringify(meetup),
+      process.env.CACHED_EXPIRATION
+    );
+
+    return meetup;
   }
 
   async createMeetup(name, description, keywords, time, place, user_id) {
